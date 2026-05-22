@@ -153,6 +153,310 @@ Use GitHub + Vercel:
 - Use stable production domain in `robots.txt` and `sitemap.xml`
 - Push to main and let Vercel auto-deploy
 
+## Code creation and commit workflow
+
+When using ChatGPT plus GitHub tools to build a project, work in small, verifiable commits.
+
+Recommended commit order:
+
+1. Add documents first: `PRD.md`, `requirements.md`, `README.md`, `QUICKSTART.md`.
+2. Add minimal app shell: `package.json`, `index.html`, `vite.config.ts`, `tsconfig`, Tailwind config.
+3. Add core types before rules: `Finding`, `VirtualFile`, `ScannerContext`, `ScanReport`.
+4. Add parser/input reader: ZIP reader, file normalizer, line utilities.
+5. Add one or two rule files at a time.
+6. Add UI after the data flow works.
+7. Add export actions: Markdown and JSON.
+8. Add fixtures and test scripts.
+9. Add SEO files and deployment config.
+10. Refactor components only after the behavior is stable.
+
+Why this order works:
+
+- It keeps every commit understandable.
+- Build errors are easier to locate.
+- Rules can be tested without UI.
+- UI does not block core scanner logic.
+- SEO and components do not distract from the first useful scan.
+
+## GitHub workflow used in this project
+
+### Initialize repository
+
+If the repository is empty, create a tiny first file before larger work:
+
+```bash
+echo "initializing repository" > .gitkeep
+git add .gitkeep
+git commit -m "Initialize repository"
+git push origin main
+```
+
+When using GitHub through ChatGPT tools, a repository may need an initial commit before file operations work smoothly.
+
+### Local sync loop
+
+After ChatGPT pushes code, always run locally:
+
+```bash
+git pull
+npm install
+npm run build
+```
+
+When tests exist, run:
+
+```bash
+npm run test
+npm run build
+```
+
+When fixture archives exist, run:
+
+```bash
+npm run build:archives
+```
+
+### Normal local commit loop
+
+For manual changes:
+
+```bash
+git status
+git add .
+git commit -m "Describe the change clearly"
+git push origin main
+```
+
+### Useful debugging commands
+
+```bash
+npm run dev          # local development server
+npm run build        # TypeScript + production build
+npm run preview      # preview built dist output
+npm run test         # Vitest rule tests
+npm run typecheck    # TypeScript only
+npm run build:archives
+```
+
+## Command-line and build pitfalls from this project
+
+### Pitfall: `npm run dev` and `npm run build` are different
+
+`npm run dev` starts a development server and keeps running. It does not finish by itself.
+
+`npm run build` compiles TypeScript and builds production files into `dist/`.
+
+Use this workflow:
+
+```bash
+npm run dev
+# test in browser
+# press Ctrl+C to stop dev server
+npm run build
+```
+
+Or use two terminals if you want both.
+
+### Pitfall: TypeScript build can fail even when Vite dev runs
+
+The project initially failed because React type declarations were missing.
+
+Fix:
+
+```bash
+npm install -D @types/react @types/react-dom
+```
+
+Keep these in `devDependencies` for React + TypeScript projects.
+
+### Pitfall: Windows PowerShell multiline behavior
+
+In PowerShell, if you paste multiple commands, prompts may show `>>`. This is usually fine when commands are separated by new lines, but if a command is incomplete, PowerShell may wait for more input.
+
+Safer commands:
+
+```powershell
+git pull
+npm install
+npm run build
+```
+
+Or chain them:
+
+```powershell
+git pull; npm install; npm run build
+```
+
+### Pitfall: generated archives should not include heavy folders
+
+Do not include these in ZIP/source archives:
+
+```txt
+node_modules/
+dist/
+.git/
+.vercel/
+.env
+.env.local
+```
+
+The archive script should explicitly skip build folders and secrets.
+
+### Pitfall: `.gitignore` can block needed generated files
+
+If you ignore all zip files with `*.zip`, but want fixture zips committed, add exceptions:
+
+```gitignore
+*.zip
+!src.zip
+!fixtures.zip
+!extension-test.zip
+!fixtures/*.zip
+```
+
+For most projects, do not commit generated ZIPs unless they are small fixtures or release assets.
+
+### Pitfall: binary fixtures and risky code may be blocked
+
+Trying to commit test files with `eval()` or string-code execution examples may trigger safety filters. Safer alternatives:
+
+- Put risky examples in unit test strings only when allowed.
+- Use placeholder fixture files in the repository.
+- Add a local fixture generator script for tests that should not be committed directly.
+- Document how to create the risky fixture locally.
+
+### Pitfall: React component extraction can leave duplicate code
+
+In this project, some components were extracted while old inline code remained in `App.tsx` temporarily. For future projects, when extracting a component, immediately update `App.tsx` in the same commit or the next commit.
+
+Good pattern:
+
+1. Create `components/UploadZone.tsx`.
+2. Import it in `App.tsx`.
+3. Delete old inline upload JSX.
+4. Run `npm run build`.
+5. Commit.
+
+### Pitfall: Vercel deployment config should be explicit
+
+Add `vercel.json`:
+
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
+}
+```
+
+This avoids framework detection surprises.
+
+### Pitfall: robots and sitemap should use stable canonical domain
+
+Do not put a random preview URL in `robots.txt` or `sitemap.xml`.
+
+Use the stable production domain:
+
+```txt
+https://your-project.vercel.app/
+```
+
+Later, replace it with the custom domain.
+
+### Pitfall: Vercel auto-deploy can cancel intermediate commits
+
+When many commits are pushed quickly, Vercel may cancel older deployments and only deploy the newest commit. This is normal. Check the newest production deployment state, not every historical deployment.
+
+## Code patterns worth reusing
+
+### Report-first model
+
+Design reports before UI:
+
+```ts
+type ScanReport = {
+  inputName: string
+  scannedAt: string
+  summary: {
+    total: number
+    high: number
+    medium: number
+    low: number
+  }
+  findings: Finding[]
+  manualChecklist: ManualChecklistItem[]
+}
+```
+
+### Rule runner registry
+
+Keep rules independent:
+
+```ts
+type RuleRunner = (context: ScannerContext) => Finding[]
+
+const ruleRunners: RuleRunner[] = [
+  runManifestRules,
+  runRemoteCodeRules,
+  runCspRules,
+]
+
+export function scanContext(context: ScannerContext): ScanReport {
+  const findings = ruleRunners.flatMap((runner) => runner(context))
+  return buildReport(findings)
+}
+```
+
+### File parser boundary
+
+Raw input parsing should happen once:
+
+```ts
+const context = await readInput(file)
+const report = scanContext(context)
+```
+
+Do not parse files inside UI components.
+
+### Export actions
+
+Every useful tool should provide outputs users can carry away:
+
+```txt
+Copy Markdown
+Download JSON
+```
+
+This also gives a measurable success event later.
+
+### Manual checklist pattern
+
+If the tool cannot know something, do not fake certainty. Put it in a manual checklist.
+
+Examples:
+
+- Dashboard fields
+- Human policy interpretation
+- User intent
+- External account settings
+- Third-party approval status
+
+### SEO data object pattern
+
+For static SEO pages, keep content in data:
+
+```ts
+type SeoPageData = {
+  path: string
+  title: string
+  eyebrow: string
+  description: string
+  sections: Array<{ heading: string; body: string }>
+}
+```
+
+Then render it with one reusable `SeoPage` component.
+
 ## Lessons learned
 
 ### High findings must be rare and trustworthy
@@ -256,6 +560,19 @@ Always include:
 - Stable canonical domain
 - README with local test workflow
 
+### Pitfall 6: Claiming completion before running local commands
+
+Do not call a project complete until these pass locally:
+
+```bash
+npm install
+npm run test
+npm run build
+npm run build:archives
+```
+
+If a command fails, fix the command or update the documentation.
+
 ## Future tool template
 
 Use this checklist for the next tool:
@@ -288,6 +605,41 @@ GitHub + Vercel deployment
 robots.txt + sitemap.xml
 No backend for MVP
 ```
+
+## Standard commands for future projects
+
+```bash
+npm create vite@latest my-tool -- --template react-ts
+cd my-tool
+npm install
+npm install -D tailwindcss postcss autoprefixer vitest
+npm install jszip
+npm run dev
+npm run build
+npm run test
+```
+
+For GitHub:
+
+```bash
+git init
+git add .
+git commit -m "Initial MVP"
+git branch -M main
+git remote add origin https://github.com/YOUR_NAME/YOUR_REPO.git
+git push -u origin main
+```
+
+For Vercel:
+
+```bash
+npm install -g vercel
+vercel login
+vercel deploy
+vercel --prod
+```
+
+Or connect GitHub in Vercel and let pushes to `main` auto-deploy.
 
 ## Decision rule for future ideas
 
