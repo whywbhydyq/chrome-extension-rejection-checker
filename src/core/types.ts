@@ -19,6 +19,7 @@ export type VirtualFile = {
   extension: string
   isText: boolean
   text?: string
+  bytes?: Uint8Array
 }
 
 export type ScannerContext = {
