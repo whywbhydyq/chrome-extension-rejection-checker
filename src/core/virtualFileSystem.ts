@@ -33,7 +33,7 @@ export function isProbablyText(path: string, size: number): boolean {
   return size < 64000 && extension === ''
 }
 
-export function makeVirtualFile(params: { path: string; rootPrefix: string; size: number; text?: string }): VirtualFile {
+export function makeVirtualFile(params: { path: string; rootPrefix: string; size: number; text?: string; bytes?: Uint8Array }): VirtualFile {
   const normalizedPath = stripRootPrefix(params.path, params.rootPrefix)
   return {
     path: normalizePath(params.path),
@@ -42,5 +42,6 @@ export function makeVirtualFile(params: { path: string; rootPrefix: string; size
     extension: getExtension(normalizedPath),
     isText: typeof params.text === 'string',
     text: params.text,
+    bytes: params.bytes,
   }
 }
