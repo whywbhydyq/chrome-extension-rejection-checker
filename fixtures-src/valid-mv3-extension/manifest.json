@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Valid MV3 Fixture",
+  "version": "1.0.0",
+  "description": "A minimal valid MV3 fixture for scanner smoke tests.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icons/icon128.svg"
+  }
+}
