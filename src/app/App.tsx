@@ -11,6 +11,56 @@ function resultTitle(report: ScanReport): string {
   return 'No findings detected'
 }
 
+function SeverityGuide() {
+  return (
+    <section className="mt-12 grid gap-4 md:grid-cols-3">
+      <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <h2 className="text-lg font-bold">High: likely rejection risk</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Remote hosted executable code, dynamic string execution, invalid Manifest V3 setup, unsafe CSP, and missing manifest-referenced files are flagged as High.</p>
+      </div>
+      <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <h2 className="text-lg font-bold">Medium: review scrutiny</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Broad host permissions, sensitive Chrome APIs, privacy disclosure review, and missing icon declarations are review risks, not automatic rejection claims.</p>
+      </div>
+      <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <h2 className="text-lg font-bold">Low: manual review notes</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Remote URLs found in web resources are listed for manual review so you can confirm they are APIs, images, or data instead of executable code.</p>
+      </div>
+    </section>
+  )
+}
+
+function SeoContent() {
+  return (
+    <section className="mt-16 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Manifest V3 pre-submission checklist</p>
+      <h2 className="mt-3 text-3xl font-black tracking-tight">Check common Chrome Web Store rejection causes before you upload</h2>
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
+        <article>
+          <h3 className="font-bold">Remote hosted code</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Manifest V3 extensions should bundle executable JavaScript and WebAssembly inside the submitted package. The scanner looks for remote script tags, remote imports, importScripts calls, and remote WebAssembly execution paths.</p>
+        </article>
+        <article>
+          <h3 className="font-bold">Dynamic code execution</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Patterns such as eval, new Function, and string-based timers are strong signals for CSP and review problems. The report points to the file, line, and snippet so you can replace them with bundled functions or modules.</p>
+        </article>
+        <article>
+          <h3 className="font-bold">Packaging mistakes</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">A very common submission mistake is zipping the parent project folder. Chrome Web Store expects manifest.json at the ZIP root. If the scanner finds a nested manifest, it reports a High packaging risk.</p>
+        </article>
+        <article>
+          <h3 className="font-bold">Permissions and privacy review</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Permissions such as tabs, cookies, history, scripting, debugger, and broad host access may be valid, but they should be minimized and clearly justified in your listing and privacy disclosures.</p>
+        </article>
+      </div>
+      <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+        <h3 className="font-bold">What this tool does not do</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">It does not upload your source code, log in to Chrome Web Store, scan Developer Dashboard fields, detect malware, or guarantee approval. It is a local static preflight checker designed to catch obvious issues early.</p>
+      </div>
+    </section>
+  )
+}
+
 export function App() {
   const [report, setReport] = useState<ScanReport | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +94,7 @@ export function App() {
       <section className="mx-auto max-w-5xl">
         <div className="text-center">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Free local scanner</p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Chrome Web Store Rejection Checker</h1>
+          <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Free Local Chrome Web Store Rejection Checker</h1>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-600">
             Scan your Chrome extension ZIP for common Manifest V3 rejection risks before submitting.
             <strong className="text-slate-950"> Runs locally. Your extension never leaves your browser.</strong>
@@ -132,6 +182,9 @@ export function App() {
             </div>
           </section>
         )}
+
+        <SeverityGuide />
+        <SeoContent />
       </section>
     </main>
   )
