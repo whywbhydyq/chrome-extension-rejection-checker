@@ -36,6 +36,9 @@ function scanJs(file: VirtualFile): Finding[] {
     { pattern: /\bimport\s+(?:[^'"()]+\s+from\s+)?["']https?:\/\/[^"']+\.(?:js|mjs)(?:[?#][^"']*)?["']/gi, title: 'Remote JavaScript import found', reason: 'The extension imports JavaScript from a remote URL.' },
     { pattern: /\bimport\s*\(\s*["']https?:\/\/[^"']+\.(?:js|mjs)(?:[?#][^"']*)?["']\s*\)/gi, title: 'Dynamic remote JavaScript import found', reason: 'The extension dynamically imports JavaScript from a remote URL.' },
     { pattern: /WebAssembly\.(?:instantiateStreaming|compileStreaming)\s*\(\s*fetch\s*\(\s*["']https?:\/\/[^"']+\.wasm(?:[?#][^"']*)?["']/gi, title: 'Remote WebAssembly execution path found', reason: 'The extension appears to fetch and execute WebAssembly from a remote URL.' },
+    { pattern: /(?:src|href|data)\s*=\s*["']https?:\/\/[^"']+\.(?:js|mjs)(?:[?#][^"']*)?["']/gi, title: 'Remote JavaScript URL assignment found', reason: 'The code assigns a remote JavaScript URL to a property that may load executable code.' },
+    { pattern: /(?:appendChild|insertBefore)\s*\([^)]*script[^)]*\)/gi, title: 'Dynamic script insertion found', reason: 'The code dynamically inserts a script element. Review nearby code to confirm it does not load remote executable code.' },
+    { pattern: /document\.createElement\s*\(\s*["']script["']\s*\)/gi, title: 'Dynamic script element creation found', reason: 'The code creates a script element dynamically. Review nearby code to confirm it does not load remote executable code.' },
   ]
 
   for (const item of patterns) {
