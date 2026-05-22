@@ -4,6 +4,7 @@ import { findMatches } from '../core/lineUtils'
 const sourceUrl = 'https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code'
 const remoteUrlPattern = /https?:\/\/[^\s'"`<>)]+/gi
 const remoteCodeUrlPattern = /https?:\/\/[^\s'"`<>)]+\.(?:js|mjs|wasm)(?:[?#][^\s'"`<>)]+)?/i
+const lowRemoteUrlExtensions = new Set(['.js', '.mjs', '.cjs', '.html', '.htm', '.css'])
 
 function high(file: VirtualFile, line: number, snippet: string, title: string, reason: string): Finding {
   return {
@@ -57,18 +58,24 @@ function scanJs(file: VirtualFile): Finding[] {
   return findings
 }
 
+function shouldLowScan(file: VirtualFile): boolean {
+  if (!lowRemoteUrlExtensions.has(file.extension)) return false
+  if (file.normalizedPath === 'manifest.json') return false
+  return true
+}
+
 function scanRemoteUrls(context: ScannerContext): Finding[] {
   const findings: Finding[] = []
   const seen = new Set<string>()
   for (const file of context.textFiles) {
-    if (!file.text) continue
+    if (!file.text || !shouldLowScan(file)) continue
     for (const match of findMatches(file.text, remoteUrlPattern)) {
       const url = match.match[0]
       if (remoteCodeUrlPattern.test(url)) continue
-      const key = `${file.normalizedPath}:${match.line}:${url}`
+      const key = `${file.normalizedPath}:${match.line}:${match.snippet}`
       if (seen.has(key)) continue
       seen.add(key)
-      findings.push({ ruleId: 'CWS010', severity: 'low', title: 'Remote URL found for manual review', file: file.normalizedPath, line: match.line, snippet: match.snippet, reason: 'A remote URL was found. It may be a normal API, image, JSON, CSS, or documentation URL.', recommendation: 'Confirm that this URL is not used to load or execute JavaScript or WebAssembly.', sourceUrl })
+      findings.push({ ruleId: 'CWS010', severity: 'low', title: 'Remote URL found for manual review', file: file.normalizedPath, line: match.line, snippet: match.snippet, reason: 'A remote URL was found in an executable or web resource file. It may be a normal API, image, JSON, CSS, or documentation URL.', recommendation: 'Confirm that this URL is not used to load or execute JavaScript or WebAssembly.', sourceUrl })
     }
   }
   return findings
