@@ -1,0 +1,1 @@
+This fixture directory is reserved for dynamic execution tests. The executable example is intentionally not stored in this repository file.
