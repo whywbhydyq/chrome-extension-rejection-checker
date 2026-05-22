@@ -34,9 +34,13 @@ async function listFiles(dir) {
 }
 
 async function zipFiles(files, baseDir, outputPath) {
-  const zip = new JSZip()
-
+  const existingFiles = []
   for (const file of files) {
+    if (await exists(file)) existingFiles.push(file)
+  }
+
+  const zip = new JSZip()
+  for (const file of existingFiles) {
     const relative = path.relative(baseDir, file).replaceAll(path.sep, '/')
     zip.file(relative, await fs.readFile(file))
   }
@@ -53,6 +57,10 @@ async function zipFiles(files, baseDir, outputPath) {
 }
 
 async function zipDirectory(dir, outputPath, includeRoot = false) {
+  if (!(await exists(dir))) {
+    console.warn(`skip missing directory ${path.relative(root, dir)}`)
+    return
+  }
   const files = await listFiles(dir)
   const baseDir = includeRoot ? path.dirname(dir) : dir
   await zipFiles(files, baseDir, outputPath)
@@ -69,14 +77,18 @@ async function main() {
     'tailwind.config.ts',
     'postcss.config.js',
     'README.md',
+    'QUICKSTART.md',
+    'PRD.md',
+    'requirements.md',
     '.gitignore',
   ].map((item) => path.join(root, item))
 
   const srcFiles = await listFiles(path.join(root, 'src'))
-  await zipFiles([...srcBundleFiles, ...srcFiles], root, path.join(root, 'src.zip'))
+  const publicFiles = await listFiles(path.join(root, 'public'))
+  await zipFiles([...srcBundleFiles, ...srcFiles, ...publicFiles], root, path.join(root, 'src.zip'))
 
   const fixtureRoot = path.join(root, 'fixtures-src')
-  const fixtureFolders = await fs.readdir(fixtureRoot, { withFileTypes: true })
+  const fixtureFolders = (await exists(fixtureRoot)) ? await fs.readdir(fixtureRoot, { withFileTypes: true }) : []
 
   for (const entry of fixtureFolders) {
     if (!entry.isDirectory()) continue
@@ -88,7 +100,7 @@ async function main() {
   }
 
   await zipDirectory(path.join(root, 'fixtures-src'), path.join(root, 'fixtures.zip'), true)
-  await zipDirectory(path.join(root, 'fixtures-src', 'extension-test'), path.join(root, 'extension-test.zip'), false)
+  await zipDirectory(path.join(root, 'fixtures-src', 'valid-mv3-extension'), path.join(root, 'extension-test.zip'), false)
 }
 
 main().catch((error) => {
