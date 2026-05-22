@@ -18,12 +18,16 @@ function scriptSrcContainsRemoteSource(csp: string): boolean {
   return Boolean(scriptSrc && /https?:\/\//i.test(scriptSrc))
 }
 
+function containsUnsafeEval(csp: string): boolean {
+  return /(^|\s)'unsafe-eval'(?=\s|;|$)/i.test(csp)
+}
+
 export function runCspRules(context: ScannerContext): Finding[] {
   if (!context.manifest) return []
   const findings: Finding[] = []
 
   for (const csp of getExtensionPageCsp(context.manifest)) {
-    if (/(^|\s)'unsafe-eval'(\s|$)/i.test(csp)) {
+    if (containsUnsafeEval(csp)) {
       findings.push({
         ruleId: 'CWS005',
         severity: 'high',
