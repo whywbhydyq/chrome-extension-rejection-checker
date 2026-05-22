@@ -7,6 +7,10 @@ function pickManifestPath(paths: string[]): string | undefined {
   return paths.find((path) => path.endsWith('/manifest.json'))
 }
 
+function shouldReadBytes(path: string): boolean {
+  return /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(path)
+}
+
 export async function readExtensionZip(file: File): Promise<ScannerContext> {
   if (!file.name.toLowerCase().endsWith('.zip')) throw new Error('Please choose a .zip file.')
 
@@ -22,6 +26,8 @@ export async function readExtensionZip(file: File): Promise<ScannerContext> {
     const normalized = normalizePath(entry.name)
     const size = (entry as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize ?? 0
     let text: string | undefined
+    let bytes: Uint8Array | undefined
+
     if (isProbablyText(normalized, size)) {
       try {
         text = await entry.async('text')
@@ -29,7 +35,16 @@ export async function readExtensionZip(file: File): Promise<ScannerContext> {
         text = undefined
       }
     }
-    allFiles.push(makeVirtualFile({ path: normalized, rootPrefix, size, text }))
+
+    if (shouldReadBytes(normalized)) {
+      try {
+        bytes = await entry.async('uint8array')
+      } catch {
+        bytes = undefined
+      }
+    }
+
+    allFiles.push(makeVirtualFile({ path: normalized, rootPrefix, size, text, bytes }))
   }
 
   const files = new Map<string, VirtualFile>()
