@@ -55,8 +55,19 @@ describe('runIconRules', () => {
   })
 
   it('accepts matching PNG dimensions', () => {
-    const file = vf('icons/icon128.png', '', pngHeader(128, 128))
-    const findings = runIconRules(ctx({ manifest_version: 3, icons: { '128': 'icons/icon128.png', '16': 'icons/icon128.png', '32': 'icons/icon128.png', '48': 'icons/icon128.png' } }, [file]))
-    expect(findings.some((finding) => finding.file === 'icons/icon128.png' && finding.title.includes('does not match'))).toBe(false)
+    const icon16 = vf('icons/icon16.png', '', pngHeader(16, 16))
+    const icon32 = vf('icons/icon32.png', '', pngHeader(32, 32))
+    const icon48 = vf('icons/icon48.png', '', pngHeader(48, 48))
+    const icon128 = vf('icons/icon128.png', '', pngHeader(128, 128))
+    const findings = runIconRules(ctx({
+      manifest_version: 3,
+      icons: {
+        '16': 'icons/icon16.png',
+        '32': 'icons/icon32.png',
+        '48': 'icons/icon48.png',
+        '128': 'icons/icon128.png',
+      },
+    }, [icon16, icon32, icon48, icon128]))
+    expect(findings.some((finding) => finding.title.includes('does not match'))).toBe(false)
   })
 })
