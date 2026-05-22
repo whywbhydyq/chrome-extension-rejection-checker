@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chrome-extension-rejection-checker-f6l6nafd4.vercel.app/sitemap.xml
