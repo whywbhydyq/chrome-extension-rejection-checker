@@ -4,29 +4,46 @@ type UploadZoneProps = {
 }
 
 export function UploadZone({ scanning, onFile }: UploadZoneProps) {
+  const inputId = 'extension-zip-input'
+
+  function handleFile(file?: File | null) {
+    if (!file) return
+    onFile(file)
+  }
+
   return (
-    <label
-      className="mx-auto mt-10 flex max-w-3xl cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 text-center shadow-sm hover:border-slate-500"
+    <div
+      className="mx-auto mt-10 flex max-w-3xl flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-white p-8 text-center shadow-sm hover:border-slate-500 focus-within:border-slate-950 focus-within:ring-4 focus-within:ring-slate-200 sm:p-10"
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => {
         event.preventDefault()
-        const file = event.dataTransfer.files.item(0)
-        if (file) onFile(file)
+        handleFile(event.dataTransfer.files.item(0))
       }}
     >
-      <span className="text-xl font-semibold">Drop your extension .zip here</span>
-      <span className="mt-2 text-sm text-slate-600">No upload. No signup. Static preflight scan only.</span>
+      <label htmlFor={inputId} className="cursor-pointer">
+        <span className="block text-xl font-semibold">Scan extension ZIP locally</span>
+        <span id="zip-help" className="mt-2 block text-sm leading-6 text-slate-600">
+          Select or drop the production ZIP you plan to submit. manifest.json should be at the ZIP root.
+        </span>
+        <span className="mt-4 inline-flex rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
+          {scanning ? 'Scanning locally…' : 'Choose ZIP file'}
+        </span>
+      </label>
       <input
-        className="hidden"
+        id={inputId}
+        className="sr-only"
         type="file"
         accept=".zip,application/zip"
+        aria-describedby="zip-help"
         disabled={scanning}
         onChange={(event) => {
-          const file = event.currentTarget.files?.item(0)
-          if (file) onFile(file)
+          handleFile(event.currentTarget.files?.item(0))
           event.currentTarget.value = ''
         }}
       />
-    </label>
+      <p className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">
+        No upload · No signup · Browser-only static scan
+      </p>
+    </div>
   )
 }
