@@ -14,6 +14,14 @@ body {
   color: #0f172a;
 }
 
+a:focus-visible,
+button:focus-visible,
+label:focus-visible,
+input:focus-visible {
+  outline: 3px solid #0f172a;
+  outline-offset: 3px;
+}
+
 code,
 pre {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
