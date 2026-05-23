@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-const siteUrl = 'https://chrome-extension-rejection-checker.vercel.app'
+const siteUrl = 'https://cws.ymirtool.com'
 const dataPath = join(process.cwd(), 'src', 'pages', 'seoPagesData.json')
 const pages = JSON.parse(await readFile(dataPath, 'utf8'))
 
