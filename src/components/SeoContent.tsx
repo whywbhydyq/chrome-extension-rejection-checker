@@ -15,6 +15,11 @@ const relatedGuides = [
     description: 'Find and replace remote script, importScripts, dynamic import, and WebAssembly execution risks.',
   },
   {
+    href: '/blue-argon-chrome-extension-error',
+    title: 'Fix Blue Argon rejection errors',
+    description: 'Use the rejected ZIP to find remote hosted code patterns commonly associated with Blue Argon emails.',
+  },
+  {
     href: '/chrome-extension-eval-rejection-fix',
     title: 'Fix eval and dynamic code rejection',
     description: 'Replace eval, Function constructors, and string-based timers with bundled functions or modules.',
@@ -23,6 +28,16 @@ const relatedGuides = [
     href: '/chrome-extension-host-permissions-privacy-review',
     title: 'Host permissions and privacy review checklist',
     description: 'Minimize broad host permissions and prepare clear Chrome Web Store privacy disclosures.',
+  },
+  {
+    href: '/privacy',
+    title: 'Privacy notes for local ZIP scanning',
+    description: 'Understand what the scanner reads locally and which analytics data should never be collected.',
+  },
+  {
+    href: '/how-it-works',
+    title: 'How the scanner works',
+    description: 'Review the static rules, severity model, limits, and recommended resubmission workflow.',
   },
 ]
 
@@ -42,6 +57,10 @@ const faqs = [
   {
     question: 'What is remotely hosted code in Manifest V3?',
     answer: 'Remote hosted code generally means executable JavaScript or WebAssembly loaded from outside the submitted extension package. The scanner flags remote script paths and related execution patterns so you can bundle executable code into the ZIP.',
+  },
+  {
+    question: 'What does a Blue Argon rejection usually mean?',
+    answer: 'Blue Argon is commonly associated with remotely hosted code. Scan the exact rejected ZIP and inspect every remote script, dynamic import, importScripts call, WebAssembly fetch path, and generated dependency bundle.',
   },
   {
     question: 'Why does the scanner flag broad host permissions?',
@@ -71,6 +90,11 @@ export function SeoContent() {
             <a className="mt-3 inline-block text-sm font-semibold underline" href="/fix-remote-hosted-code-manifest-v3">Fix remote hosted code in Manifest V3</a>
           </article>
           <article>
+            <h3 className="font-bold">Blue Argon rejection</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">If a Chrome Web Store rejection mentions Blue Argon, scan the rejected ZIP and check every bundled HTML, worker, script, generated dependency, and WebAssembly loader for remote executable code.</p>
+            <a className="mt-3 inline-block text-sm font-semibold underline" href="/blue-argon-chrome-extension-error">Fix Blue Argon rejection errors</a>
+          </article>
+          <article>
             <h3 className="font-bold">Dynamic code execution</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">Patterns such as eval, new Function, and string-based timers are strong signals for CSP and review problems. The report points to the file, line, and snippet so you can replace them with bundled functions or modules.</p>
             <a className="mt-3 inline-block text-sm font-semibold underline" href="/chrome-extension-eval-rejection-fix">Fix eval and dynamic code rejection</a>
@@ -85,10 +109,16 @@ export function SeoContent() {
             <p className="mt-2 text-sm leading-6 text-slate-600">Permissions such as tabs, cookies, history, scripting, debugger, and broad host access may be valid, but they should be minimized and clearly justified in your listing and privacy disclosures.</p>
             <a className="mt-3 inline-block text-sm font-semibold underline" href="/chrome-extension-host-permissions-privacy-review">Review permissions and privacy signals</a>
           </article>
+          <article>
+            <h3 className="font-bold">Privacy and scanner limits</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">The scanner reads the selected ZIP locally and should not send source code, manifest content, snippets, file names, or file paths to analytics. It is a static preflight check, not an official approval result.</p>
+            <a className="mt-3 inline-block text-sm font-semibold underline" href="/privacy">Read privacy notes</a>
+          </article>
         </div>
         <div className="mt-8 rounded-2xl bg-slate-50 p-5">
           <h3 className="font-bold">Privacy and limits</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">This tool does not upload your source code, log in to Chrome Web Store, scan Developer Dashboard fields, detect malware, or guarantee approval. It is a local static preflight checker designed to catch obvious issues early.</p>
+          <a className="mt-3 inline-block text-sm font-semibold underline" href="/how-it-works">See how the scanner works</a>
         </div>
       </section>
 
