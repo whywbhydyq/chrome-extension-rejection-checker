@@ -36,7 +36,10 @@ export function scanContext(context: ScannerContext): ScanReport {
       { title: 'Developer Dashboard privacy policy URL', description: 'Verify that the Chrome Web Store privacy policy URL is accurate and current when user data is involved.' },
       { title: 'Privacy practices fields', description: 'Review data-use disclosures in the Developer Dashboard. These fields are not stored in the zip.' },
       { title: 'Permission justifications', description: 'Make sure broad and sensitive permissions are tied to the extension single purpose.' },
-      { title: 'Store listing consistency', description: 'Check listing description, screenshots, claims, and manifest version describe the same release.' },
+      { title: 'Single purpose description', description: 'Confirm that the extension purpose is narrow, clear, and consistent across the manifest, listing, screenshots, and reviewer notes.' },
+      { title: 'Store listing description accuracy', description: 'Check that listing copy, screenshots, claims, and permissions describe the same behavior as the submitted ZIP.' },
+      { title: 'Version number and release notes', description: 'Confirm the submitted manifest version, package contents, release notes, and reviewer notes all describe the intended release.' },
+      { title: 'Account and item policy compliance', description: 'Review account standing, item policy requirements, branding, impersonation, user data, ads, and prohibited content requirements outside the ZIP scanner.' },
     ],
   }
 }
