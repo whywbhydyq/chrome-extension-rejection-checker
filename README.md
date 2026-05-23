@@ -4,6 +4,10 @@ Free local Chrome Web Store preflight scanner for Manifest V3 extension `.zip` f
 
 Production URL:
 
+https://cws.ymirtool.com/
+
+Vercel fallback URL:
+
 https://chrome-extension-rejection-checker.vercel.app/
 
 ## Trust promise
@@ -107,6 +111,8 @@ The project is configured for Vercel with `vercel.json`:
 - Output directory: `dist`
 - Static route rewrites: each SEO/trust route points to its generated static `index.html`
 - SPA fallback: all other routes rewrite to `/index.html`
+- Primary production domain: `cws.ymirtool.com`
+- Vercel fallback domain: `chrome-extension-rejection-checker.vercel.app`
 
 Every push to `main` triggers a Vercel production deployment through the GitHub integration.
 
@@ -117,9 +123,9 @@ After deployment, verify the production HTML source, not only the rendered brows
 Use browser “View Page Source” or curl for each SEO route:
 
 ```bash
-curl -L https://chrome-extension-rejection-checker.vercel.app/manifest-v3-pre-submission-checklist
-curl -L https://chrome-extension-rejection-checker.vercel.app/blue-argon-chrome-extension-error
-curl -L https://chrome-extension-rejection-checker.vercel.app/privacy
+curl -L https://cws.ymirtool.com/manifest-v3-pre-submission-checklist
+curl -L https://cws.ymirtool.com/blue-argon-chrome-extension-error
+curl -L https://cws.ymirtool.com/privacy
 ```
 
 Confirm that each route has its own:
@@ -132,7 +138,7 @@ Confirm that each route has its own:
 - Visible static body content such as `<h1>`, guide sections, checklist, examples, FAQ, and related links
 - FAQPage JSON-LD matching the visible FAQ content for that route
 
-The canonical URL for a guide page should point to that exact guide URL, not to the homepage.
+The canonical URL for a guide page should point to `https://cws.ymirtool.com/...`, not to the homepage or the Vercel fallback domain.
 
 ## Analytics safety
 
@@ -161,7 +167,7 @@ The app includes:
 - `public/robots.txt`
 - `public/sitemap.xml` with all guide URLs and `lastmod`
 
-When moving to a custom domain, update the canonical domain in:
+When moving to another custom domain, update the canonical domain in:
 
 - `index.html`
 - `scripts/generate-static-seo-pages.mjs`
