@@ -39,21 +39,56 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;')
 }
 
+function replaceOrInsertHeadTag(html, matcher, replacement) {
+  if (matcher.test(html)) return html.replace(matcher, replacement)
+  return html.replace('</head>', `    ${replacement}\n  </head>`)
+}
+
 function replaceMeta(html, page) {
   const canonical = `${siteUrl}${page.path}`
   const escapedTitle = escapeHtml(page.title)
   const escapedDescription = escapeHtml(page.description)
   const escapedCanonical = escapeHtml(canonical)
 
-  return html
-    .replace(/<title>.*?<\/title>/s, `<title>${escapedTitle}</title>`)
-    .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/>/s, `<meta name="description" content="${escapedDescription}" />`)
-    .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/>/s, `<link rel="canonical" href="${escapedCanonical}" />`)
-    .replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/>/s, `<meta property="og:url" content="${escapedCanonical}" />`)
-    .replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/>/s, `<meta property="og:title" content="${escapedTitle}" />`)
-    .replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/>/s, `<meta property="og:description" content="${escapedDescription}" />`)
-    .replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/>/s, `<meta name="twitter:title" content="${escapedTitle}" />`)
-    .replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/>/s, `<meta name="twitter:description" content="${escapedDescription}" />`)
+  let nextHtml = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapedTitle}</title>`)
+
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bname="description")[^>]*>/,
+    `<meta name="description" content="${escapedDescription}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<link\b(?=[^>]*\brel="canonical")[^>]*>/,
+    `<link rel="canonical" href="${escapedCanonical}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:url")[^>]*>/,
+    `<meta property="og:url" content="${escapedCanonical}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:title")[^>]*>/,
+    `<meta property="og:title" content="${escapedTitle}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:description")[^>]*>/,
+    `<meta property="og:description" content="${escapedDescription}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bname="twitter:title")[^>]*>/,
+    `<meta name="twitter:title" content="${escapedTitle}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bname="twitter:description")[^>]*>/,
+    `<meta name="twitter:description" content="${escapedDescription}" />`,
+  )
+
+  return nextHtml
 }
 
 const templatePath = join(process.cwd(), 'dist', 'index.html')
