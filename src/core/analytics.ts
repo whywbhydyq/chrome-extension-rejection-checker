@@ -1,5 +1,8 @@
 type AnalyticsParams = Record<string, string | number | boolean | undefined>
 
+const contentVersion = '2026-05-23'
+const rulesVersion = '2026-05-23-mv3-static-rules'
+
 declare global {
   interface Window {
     dataLayer?: Array<Record<string, unknown>>
@@ -14,6 +17,8 @@ export function trackEvent(event: string, params: AnalyticsParams = {}): void {
     event,
     page_type: 'tool',
     tool_name: 'chrome_extension_rejection_checker',
+    content_version: contentVersion,
+    rules_version: rulesVersion,
     ...params,
   })
 }
