@@ -1,4 +1,3 @@
-import JSZip from 'jszip'
 import type { ScannerContext, VirtualFile } from './types'
 import { dirname, isProbablyText, makeVirtualFile, normalizePath } from './virtualFileSystem'
 
@@ -14,6 +13,7 @@ function shouldReadBytes(path: string): boolean {
 export async function readExtensionZip(file: File): Promise<ScannerContext> {
   if (!file.name.toLowerCase().endsWith('.zip')) throw new Error('Please choose a .zip file.')
 
+  const { default: JSZip } = await import('jszip')
   const zip = await JSZip.loadAsync(file)
   const entries = Object.values(zip.files).filter((entry) => !entry.dir && !normalizePath(entry.name).startsWith('__MACOSX/'))
   const rawPaths = entries.map((entry) => normalizePath(entry.name))
