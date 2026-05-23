@@ -3,11 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Local Chrome Web Store Rejection Checker</title>
+
+    <title>Chrome Extension Rejection Checker – Local MV3 ZIP Scanner</title>
     <meta
       name="description"
-      content="Scan your Chrome extension ZIP locally for common Manifest V3 Chrome Web Store rejection risks. No upload, no signup."
+      content="Scan your Chrome extension ZIP locally for Manifest V3 rejection risks: remote hosted code, eval, missing manifest files, broad permissions, CSP, and privacy review reminders. No upload or signup."
     />
+    <link rel="canonical" href="https://chrome-extension-rejection-checker.vercel.app/" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chrome-extension-rejection-checker.vercel.app/" />
+    <meta property="og:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scanner" />
+    <meta
+      property="og:description"
+      content="Check your Manifest V3 extension ZIP locally before Chrome Web Store submission. Detect common rejection risks without uploading your source code."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scanner" />
+    <meta
+      name="twitter:description"
+      content="Run a local preflight scan for common Chrome Web Store rejection risks. No upload, no signup."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Chrome Extension Rejection Checker",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": "https://chrome-extension-rejection-checker.vercel.app/",
+        "description": "A free local browser-based scanner for Chrome extension Manifest V3 ZIP files before Chrome Web Store submission.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Local ZIP scan",
+          "Manifest V3 preflight check",
+          "Remote hosted code detection",
+          "Dynamic code execution detection",
+          "Broad permissions review",
+          "Privacy disclosure reminders"
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does this Chrome extension rejection checker upload my ZIP?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The scan runs locally in your browser. Your Chrome extension ZIP is read on your device and is not uploaded by the tool."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can this tool guarantee Chrome Web Store approval?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. It is a static preflight scanner, not an official Chrome Web Store validator. It helps detect common Manifest V3 rejection risks before submission."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What rejection risks does it check?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It checks for missing or invalid manifest.json, Manifest V3 issues, missing manifest references, remote hosted code, eval and dynamic code execution, unsafe CSP, broad host permissions, sensitive Chrome API permissions, icon paths, and privacy review reminders."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
