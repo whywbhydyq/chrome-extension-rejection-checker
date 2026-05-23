@@ -17,12 +17,24 @@
       "destination": "/fix-remote-hosted-code-manifest-v3/index.html"
     },
     {
+      "source": "/blue-argon-chrome-extension-error",
+      "destination": "/blue-argon-chrome-extension-error/index.html"
+    },
+    {
       "source": "/chrome-extension-eval-rejection-fix",
       "destination": "/chrome-extension-eval-rejection-fix/index.html"
     },
     {
       "source": "/chrome-extension-host-permissions-privacy-review",
       "destination": "/chrome-extension-host-permissions-privacy-review/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy/index.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/how-it-works/index.html"
     },
     {
       "source": "/(.*)",
