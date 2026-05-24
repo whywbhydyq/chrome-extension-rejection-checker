@@ -5,7 +5,7 @@ type SeoPageProps = {
   page: SeoPageData
 }
 
-const siteUrl = 'https://chrome-extension-rejection-checker.vercel.app'
+const siteUrl = 'https://cws.ymirtool.com'
 
 function upsertMeta(name: string, content: string) {
   let element = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
