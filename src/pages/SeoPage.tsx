@@ -27,6 +27,35 @@ function upsertCanonical(href: string) {
   element.href = href
 }
 
+function PrivacyAdvertisingDisclosure() {
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="advertising-disclosure-title">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Advertising disclosure</p>
+      <h2 id="advertising-disclosure-title" className="mt-3 text-3xl font-black tracking-tight">Google advertising cookies and choices</h2>
+      <div className="mt-6 grid gap-5 md:grid-cols-3">
+        <section className="rounded-2xl bg-slate-50 p-5">
+          <h3 className="font-bold">Third-party advertising cookies</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            This site may use Google AdSense. Third-party vendors, including Google, may use cookies to serve ads based on prior visits to this site or other websites.
+          </p>
+        </section>
+        <section className="rounded-2xl bg-slate-50 p-5">
+          <h3 className="font-bold">Personalized ads</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Google's advertising cookies enable Google and its partners to serve ads based on visits to this site and other sites on the Internet.
+          </p>
+        </section>
+        <section className="rounded-2xl bg-slate-50 p-5">
+          <h3 className="font-bold">Opt-out choices</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Users can opt out of personalized advertising in <a className="font-semibold underline" href="https://adssettings.google.com/" rel="nofollow">Google Ads Settings</a> or review broader choices through <a className="font-semibold underline" href="https://www.aboutads.info/choices/" rel="nofollow">AboutAds</a>.
+          </p>
+        </section>
+      </div>
+    </section>
+  )
+}
+
 export function SeoPage({ page }: SeoPageProps) {
   useEffect(() => {
     const canonical = `${siteUrl}${page.path}`
@@ -68,6 +97,8 @@ export function SeoPage({ page }: SeoPageProps) {
             ))}
           </div>
         </section>
+
+        {page.path === '/privacy' && <PrivacyAdvertisingDisclosure />}
 
         <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="checklist-title">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Checklist</p>

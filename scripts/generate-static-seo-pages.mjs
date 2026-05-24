@@ -126,6 +126,30 @@ function renderRelatedLinks(items) {
     .join('')
 }
 
+function renderPrivacyAdvertisingDisclosure(page) {
+  if (page.path !== '/privacy') return ''
+  return `
+
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="advertising-disclosure-title">
+          <p class="text-sm font-bold uppercase tracking-widest text-slate-500">Advertising disclosure</p>
+          <h2 id="advertising-disclosure-title" class="mt-3 text-3xl font-black tracking-tight">Google advertising cookies and choices</h2>
+          <div class="mt-6 grid gap-5 md:grid-cols-3">
+            <section class="rounded-2xl bg-slate-50 p-5">
+              <h3 class="font-bold">Third-party advertising cookies</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-600">This site may use Google AdSense. Third-party vendors, including Google, may use cookies to serve ads based on prior visits to this site or other websites.</p>
+            </section>
+            <section class="rounded-2xl bg-slate-50 p-5">
+              <h3 class="font-bold">Personalized ads</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-600">Google's advertising cookies enable Google and its partners to serve ads based on visits to this site and other sites on the Internet.</p>
+            </section>
+            <section class="rounded-2xl bg-slate-50 p-5">
+              <h3 class="font-bold">Opt-out choices</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-600">Users can opt out of personalized advertising in <a class="font-semibold underline" href="https://adssettings.google.com/" rel="nofollow">Google Ads Settings</a> or review broader choices through <a class="font-semibold underline" href="https://www.aboutads.info/choices/" rel="nofollow">AboutAds</a>.</p>
+            </section>
+          </div>
+        </section>`
+}
+
 function renderStaticPage(page) {
   return `
     <main class="min-h-screen bg-slate-50 px-4 py-12 text-slate-950" data-static-seo-page="${escapeAttribute(page.path)}">
@@ -147,7 +171,7 @@ function renderStaticPage(page) {
           <h2 id="guide-sections-title" class="mt-3 text-3xl font-black tracking-tight">What to check</h2>
           <div class="mt-6 grid gap-5 md:grid-cols-3">${renderCardGrid(page.sections)}
           </div>
-        </section>
+        </section>${renderPrivacyAdvertisingDisclosure(page)}
 
         <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="checklist-title">
           <p class="text-sm font-bold uppercase tracking-widest text-slate-500">Checklist</p>
