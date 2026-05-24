@@ -56,6 +56,23 @@ function PrivacyAdvertisingDisclosure() {
   )
 }
 
+function PolicyFooter() {
+  return (
+    <footer className="border-t border-slate-200 pt-6 text-sm text-slate-600">
+      <p>
+        Chrome Extension Rejection Checker is an independent local preflight scanner. It is not affiliated with Google or Chrome Web Store and does not guarantee approval.
+      </p>
+      <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2" aria-label="Site policy links">
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/about">About</a>
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/privacy">Privacy</a>
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/terms">Terms</a>
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/disclaimer">Disclaimer</a>
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/contact">Contact</a>
+      </nav>
+    </footer>
+  )
+}
+
 export function SeoPage({ page }: SeoPageProps) {
   useEffect(() => {
     const canonical = `${siteUrl}${page.path}`
@@ -152,6 +169,8 @@ export function SeoPage({ page }: SeoPageProps) {
             </a>
           </div>
         </section>
+
+        <PolicyFooter />
       </article>
     </main>
   )
