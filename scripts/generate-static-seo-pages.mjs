@@ -150,6 +150,21 @@ function renderPrivacyAdvertisingDisclosure(page) {
         </section>`
 }
 
+function renderPolicyFooter() {
+  return `
+
+        <footer class="border-t border-slate-200 pt-6 text-sm text-slate-600">
+          <p>Chrome Extension Rejection Checker is an independent local preflight scanner. It is not affiliated with Google or Chrome Web Store and does not guarantee approval.</p>
+          <nav class="mt-3 flex flex-wrap gap-x-4 gap-y-2" aria-label="Site policy links">
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/about">About</a>
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/privacy">Privacy</a>
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/terms">Terms</a>
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/disclaimer">Disclaimer</a>
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/contact">Contact</a>
+          </nav>
+        </footer>`
+}
+
 function renderStaticPage(page) {
   return `
     <main class="min-h-screen bg-slate-50 px-4 py-12 text-slate-950" data-static-seo-page="${escapeAttribute(page.path)}">
@@ -200,7 +215,7 @@ function renderStaticPage(page) {
           <div class="mt-6 flex flex-wrap gap-3">${renderRelatedLinks(page.relatedLinks)}
             <a class="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold ring-1 ring-slate-200" href="/">Run local ZIP scan</a>
           </div>
-        </section>
+        </section>${renderPolicyFooter()}
       </article>
     </main>`
 }
