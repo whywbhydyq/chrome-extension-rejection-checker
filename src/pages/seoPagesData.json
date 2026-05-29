@@ -75,8 +75,8 @@
   {
     "path": "/manifest-v3-pre-submission-checklist",
     "eyebrow": "Manifest V3 checklist",
-    "title": "Manifest V3 pre-submission checklist for Chrome extensions",
-    "description": "Check that manifest.json is valid, at the ZIP root, uses Manifest V3, and references files that actually exist in your package.",
+    "title": "Manifest V3 Pre-Submission Checklist for Chrome Web Store",
+    "description": "Check ZIP root packaging, manifest fields, referenced files, permissions, CSP, and privacy review risks before submitting an MV3 extension.",
     "sections": [
       {
         "heading": "Package the ZIP correctly",
@@ -146,8 +146,8 @@
   {
     "path": "/fix-remote-hosted-code-manifest-v3",
     "eyebrow": "Remote hosted code fix",
-    "title": "Fix remotely hosted code issues in Manifest V3 extensions",
-    "description": "Find remote script tags, importScripts calls, remote JavaScript imports, remote WebAssembly execution paths, and remote JS URL assignments.",
+    "title": "Fix Remote Hosted Code in Manifest V3 Extensions",
+    "description": "Find and replace remote scripts, dynamic imports, importScripts calls, and WebAssembly loaders that can trigger Chrome Web Store rejection.",
     "sections": [
       {
         "heading": "What counts as remote hosted code risk",
@@ -216,8 +216,8 @@
   {
     "path": "/blue-argon-chrome-extension-error",
     "eyebrow": "Blue Argon rejection fix",
-    "title": "Fix Blue Argon Chrome extension rejection errors",
-    "description": "Use a local Manifest V3 ZIP scan to find remote hosted code patterns that can trigger Blue Argon Chrome Web Store rejection emails.",
+    "title": "Fix Blue Argon Chrome Extension Rejection",
+    "description": "Use a local MV3 ZIP scan to find remote hosted code patterns that commonly trigger Blue Argon Chrome Web Store rejection emails.",
     "sections": [
       {
         "heading": "What Blue Argon usually means",
@@ -356,8 +356,8 @@
   {
     "path": "/chrome-extension-host-permissions-privacy-review",
     "eyebrow": "Permissions and privacy review",
-    "title": "Chrome extension host permissions and privacy review checklist",
-    "description": "Review broad host permissions, sensitive Chrome APIs, privacy disclosure reminders, and Developer Dashboard fields before publishing.",
+    "title": "Chrome Extension Host Permissions Privacy Review Checklist",
+    "description": "Review broad host permissions, sensitive Chrome APIs, privacy disclosures, and Chrome Web Store reviewer notes before publishing.",
     "sections": [
       {
         "heading": "Broad host permissions",
