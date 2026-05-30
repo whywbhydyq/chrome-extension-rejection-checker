@@ -98,6 +98,7 @@ export function FindingList({ report }: FindingListProps) {
                   {finding.file && <p className="mt-2 text-sm"><strong>File:</strong> <code>{finding.file}</code>{finding.line ? ` line ${finding.line}` : ''}</p>}
                   {finding.snippet && <pre className="mt-3 overflow-auto rounded-xl bg-slate-50 p-3 text-xs">{finding.snippet}</pre>}
                   <p className="mt-3 text-sm"><strong>Reason:</strong> {finding.reason}</p>
+                  {finding.confidence && <p className="mt-2 text-sm"><strong>Confidence:</strong> {finding.confidence}</p>}
                   <p className="mt-2 text-sm"><strong>Fix:</strong> {finding.recommendation}</p>
                   {guide && (
                     <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm ring-1 ring-slate-100">

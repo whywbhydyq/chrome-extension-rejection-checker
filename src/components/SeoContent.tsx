@@ -52,7 +52,7 @@ const faqs = [
   },
   {
     question: 'What rejection risks does it check?',
-    answer: 'It checks missing or invalid manifest.json, Manifest V3 packaging mistakes, missing manifest references, remote hosted code, eval and dynamic code execution, unsafe CSP, broad host permissions, sensitive Chrome API permissions, icon paths, and privacy review reminders.',
+    answer: 'It checks missing or invalid manifest.json, Manifest V3 packaging mistakes, missing manifest references including sandbox pages, remote hosted code, eval and legacy dynamic code execution, unsafe CSP, broad host permissions, sensitive Chrome API permissions, icon paths, skipped-file limits, and privacy review reminders.',
   },
   {
     question: 'What is remotely hosted code in Manifest V3?',
@@ -96,7 +96,7 @@ export function SeoContent() {
           </article>
           <article>
             <h3 className="font-bold">Dynamic code execution</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Patterns such as eval, new Function, and string-based timers are strong signals for CSP and review problems. The report points to the file, line, and snippet so you can replace them with bundled functions or modules.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Patterns such as eval, new Function, string-based timers, legacy tabs.executeScript code strings, and DevTools inspectedWindow.eval are strong signals for CSP and review problems. The report points to the file, line, and snippet so you can replace them with bundled functions or modules.</p>
             <a className="mt-3 inline-block text-sm font-semibold underline" href="/chrome-extension-eval-rejection-fix">Fix eval and dynamic code rejection</a>
           </article>
           <article>
@@ -111,7 +111,7 @@ export function SeoContent() {
           </article>
           <article>
             <h3 className="font-bold">Privacy and scanner limits</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">The scanner reads the selected ZIP locally and should not send source code, manifest content, snippets, file names, or file paths to analytics. It is a static preflight check, not an official approval result.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">The scanner reads the selected ZIP locally and should not send source code, manifest content, snippets, file names, file paths, detected URLs, or skipped-file details to analytics. It is a static preflight check, not an official approval result.</p>
             <a className="mt-3 inline-block text-sm font-semibold underline" href="/privacy">Read privacy notes</a>
           </article>
         </div>

@@ -221,9 +221,18 @@ function renderStaticPage(page) {
 }
 
 function replaceStaticBody(html, page) {
+  const startMarker = '<!-- STATIC_ROOT_START -->'
+  const endMarker = '<!-- STATIC_ROOT_END -->'
+  const markerStart = html.indexOf(startMarker)
+  const markerEnd = html.indexOf(endMarker)
+
+  if (markerStart === -1 || markerEnd === -1 || markerEnd <= markerStart) {
+    throw new Error('Could not find STATIC_ROOT_START / STATIC_ROOT_END markers in template HTML.')
+  }
+
   const renderedPage = renderStaticPage(page)
-  if (/<div id="root"><\/div>/.test(html)) return html.replace('<div id="root"></div>', `<div id="root">${renderedPage}\n    </div>`)
-  return html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${renderedPage}\n    </div>`)
+  const contentStart = markerStart + startMarker.length
+  return `${html.slice(0, contentStart)}\n${renderedPage}\n      ${html.slice(markerEnd)}`
 }
 
 function replaceMeta(html, page) {

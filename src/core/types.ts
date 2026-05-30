@@ -10,6 +10,7 @@ export type Finding = {
   reason: string
   recommendation: string
   sourceUrl?: string
+  confidence?: string
 }
 
 export type ScanLimit = {

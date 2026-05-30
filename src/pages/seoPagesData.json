@@ -441,6 +441,10 @@
       {
         "heading": "What analytics must not collect",
         "body": "Analytics should not send source code, manifest content, snippets, file names, file paths, package names, extension IDs, ZIP names, detected URLs, or ZIP contents. Only aggregate event counts, severity totals, partial-scan status, and rules_version should be tracked."
+      },
+      {
+        "heading": "Partial scan notes stay local",
+        "body": "When the browser skips unknown-size or very large files, that partial-scan note is included in the local report. It should not be sent to analytics with file names, paths, snippets, detected URLs, or source content."
       }
     ],
     "checklist": [
@@ -502,7 +506,7 @@
     "sections": [
       {
         "heading": "Static package analysis",
-        "body": "The scanner inspects the ZIP package structure and text files. It checks manifest location, manifest version, referenced files, extension pages, JavaScript patterns, CSP script-src/worker-src/object-src, permissions, privacy signals, and icons."
+        "body": "The scanner inspects the ZIP package structure and text files. It checks manifest location, manifest version, referenced files, sandbox page references, extension pages, JavaScript patterns, CSP script-src/worker-src/object-src, permissions, privacy signals, and icons."
       },
       {
         "heading": "Rule severity",
@@ -511,6 +515,10 @@
       {
         "heading": "Limits",
         "body": "The scanner does not execute the extension, inspect Chrome Web Store Developer Dashboard fields, detect malware, audit runtime behavior, deobfuscate every possible dynamic URL construction, or guarantee approval. Large or unreadable files are skipped with partial-scan notes."
+      },
+      {
+        "heading": "Static scan boundaries",
+        "body": "Sandbox pages, unknown-size ZIP entries, source maps, fixture files, and dynamically assembled URLs can require manual review. The report marks partial-scan and confidence notes instead of treating a clean static result as approval proof."
       }
     ],
     "checklist": [
@@ -520,7 +528,9 @@
       "Use Low findings as manual review prompts.",
       "Rebuild after changes and scan the rebuilt ZIP.",
       "Keep reviewer notes aligned with the final package.",
-      "Review partial-scan notes when large files are skipped by browser safety limits."
+      "Review partial-scan notes when large files are skipped by browser safety limits.",
+      "Review sandbox.pages and content_security_policy.sandbox separately from extension_pages CSP.",
+      "Review skipped unknown-size files and any finding confidence notes before submission."
     ],
     "examples": [
       {

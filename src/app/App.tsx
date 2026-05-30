@@ -73,6 +73,15 @@ export function App() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:py-10">
       <section className="mx-auto max-w-6xl">
+        <header className="mb-6 flex flex-col gap-3 rounded-3xl bg-white/80 px-5 py-4 shadow-sm ring-1 ring-slate-200 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          <a className="text-sm font-black tracking-tight text-slate-950" href="/">Chrome Extension Rejection Checker</a>
+          <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-slate-600" aria-label="Primary navigation">
+            <a className="hover:text-slate-950" href="/how-it-works">How it works</a>
+            <a className="hover:text-slate-950" href="/privacy">Privacy</a>
+            <a className="hover:text-slate-950" href="/fix-remote-hosted-code-manifest-v3">Rules covered</a>
+          </nav>
+        </header>
+
         <HeroSection />
 
         <section className="mt-8 grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]" aria-label="Local ZIP scanner workbench">

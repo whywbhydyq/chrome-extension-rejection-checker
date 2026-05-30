@@ -31,19 +31,39 @@ describe('runCspRules', () => {
 
   it('flags remote script-src sources', () => {
     const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'self' https://cdn.example.com; object-src 'self'" } }))
-    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('remote script'))).toBe(true)
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('script-src'))).toBe(true)
   })
 
+  it('flags scheme-only script-src sources', () => {
+    const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'self' https:; object-src 'self'" } }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.snippet?.includes('https:'))).toBe(true)
+  })
+
+  it('flags default-src fallback when script-src is missing', () => {
+    const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "default-src 'self' blob:; object-src 'self'" } }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('script-src'))).toBe(true)
+  })
 
 
   it('flags remote worker-src sources', () => {
     const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'self'; worker-src https://cdn.example.com; object-src 'self'" } }))
-    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('worker'))).toBe(true)
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('worker-src'))).toBe(true)
   })
 
   it('flags missing object-src on custom extension page CSP', () => {
     const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'self'" } }))
     expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('object-src'))).toBe(true)
+  })
+
+
+  it('flags legacy string CSP format in Manifest V3', () => {
+    const findings = runCspRules(ctx({ manifest_version: 3, content_security_policy: "script-src 'self'; object-src 'self'" }))
+    expect(findings.some((finding) => finding.title.includes('legacy string format'))).toBe(true)
+  })
+
+  it('adds manual review when sandbox pages are present', () => {
+    const findings = runCspRules(ctx({ manifest_version: 3, sandbox: { pages: ['sandbox.html'] }, content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'", sandbox: "sandbox allow-scripts; script-src 'self'" } }))
+    expect(findings.some((finding) => finding.title.includes('Sandbox pages'))).toBe(true)
   })
 
   it('accepts local-only script-src', () => {

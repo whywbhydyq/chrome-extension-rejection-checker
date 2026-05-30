@@ -45,6 +45,26 @@ describe('runManifestRules', () => {
     expect(findings.some((finding) => finding.ruleId === 'CWS004' && finding.snippet?.includes('options_page'))).toBe(true)
   })
 
+  it('flags remote executable manifest references as CWS001', () => {
+    const files = [vf('manifest.json')]
+    const findings = runManifestRules(ctx({ manifestPath: 'manifest.json', manifest: { manifest_version: 3, background: { service_worker: 'https://cdn.example.com/sw.js' } }, allFiles: files }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001' && finding.severity === 'high')).toBe(true)
+  })
+
+  it('flags leading slash manifest paths instead of silently skipping them', () => {
+    const files = [vf('manifest.json'), vf('popup.html')]
+    const findings = runManifestRules(ctx({ manifestPath: 'manifest.json', manifest: { manifest_version: 3, action: { default_popup: '/popup.html' } }, allFiles: files }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS004' && finding.title.includes('leading slash'))).toBe(true)
+  })
+
+
+  it('flags missing sandbox pages as manifest references', () => {
+    const files = [vf('manifest.json')]
+    const findings = runManifestRules(ctx({ manifestPath: 'manifest.json', manifest: { manifest_version: 3, sandbox: { pages: ['sandbox.html'] } }, allFiles: files }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS004' && finding.snippet?.includes('sandbox.pages'))).toBe(true)
+  })
+
+
   it('does not flag existing referenced files', () => {
     const files = [vf('manifest.json'), vf('popup.html'), vf('icons/icon128.svg')]
     const findings = runManifestRules(ctx({ manifestPath: 'manifest.json', manifest: { manifest_version: 3, action: { default_popup: 'popup.html' }, icons: { '128': 'icons/icon128.svg' } }, allFiles: files }))

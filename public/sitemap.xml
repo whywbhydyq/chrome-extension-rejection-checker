@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://cws.ymirtool.com/</loc><lastmod>2026-05-24</lastmod><priority>1.0</priority></url>
-  <url><loc>https://cws.ymirtool.com/chrome-web-store-rejection-checker</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/manifest-v3-pre-submission-checklist</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/fix-remote-hosted-code-manifest-v3</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/blue-argon-chrome-extension-error</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/chrome-extension-eval-rejection-fix</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/chrome-extension-host-permissions-privacy-review</loc><lastmod>2026-05-24</lastmod><priority>0.9</priority></url>
-  <url><loc>https://cws.ymirtool.com/privacy</loc><lastmod>2026-05-24</lastmod><priority>0.7</priority></url>
-  <url><loc>https://cws.ymirtool.com/how-it-works</loc><lastmod>2026-05-24</lastmod><priority>0.7</priority></url>
-  <url><loc>https://cws.ymirtool.com/about</loc><lastmod>2026-05-24</lastmod><priority>0.5</priority></url>
-  <url><loc>https://cws.ymirtool.com/terms</loc><lastmod>2026-05-24</lastmod><priority>0.5</priority></url>
-  <url><loc>https://cws.ymirtool.com/disclaimer</loc><lastmod>2026-05-24</lastmod><priority>0.5</priority></url>
-  <url><loc>https://cws.ymirtool.com/contact</loc><lastmod>2026-05-24</lastmod><priority>0.5</priority></url>
+  <url><loc>https://cws.ymirtool.com/</loc><lastmod>2026-05-30</lastmod><priority>1.0</priority></url>
+  <url><loc>https://cws.ymirtool.com/chrome-web-store-rejection-checker</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/manifest-v3-pre-submission-checklist</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/fix-remote-hosted-code-manifest-v3</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/blue-argon-chrome-extension-error</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/chrome-extension-eval-rejection-fix</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/chrome-extension-host-permissions-privacy-review</loc><lastmod>2026-05-30</lastmod><priority>0.9</priority></url>
+  <url><loc>https://cws.ymirtool.com/privacy</loc><lastmod>2026-05-30</lastmod><priority>0.7</priority></url>
+  <url><loc>https://cws.ymirtool.com/how-it-works</loc><lastmod>2026-05-30</lastmod><priority>0.7</priority></url>
+  <url><loc>https://cws.ymirtool.com/about</loc><lastmod>2026-05-30</lastmod><priority>0.5</priority></url>
+  <url><loc>https://cws.ymirtool.com/terms</loc><lastmod>2026-05-30</lastmod><priority>0.5</priority></url>
+  <url><loc>https://cws.ymirtool.com/disclaimer</loc><lastmod>2026-05-30</lastmod><priority>0.5</priority></url>
+  <url><loc>https://cws.ymirtool.com/contact</loc><lastmod>2026-05-30</lastmod><priority>0.5</priority></url>
 </urlset>

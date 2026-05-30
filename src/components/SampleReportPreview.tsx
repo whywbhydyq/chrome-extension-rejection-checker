@@ -17,7 +17,7 @@ export function SampleReportPreview({ scanning }: SampleReportPreviewProps) {
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Report preview</p>
           <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
-            {scanning ? 'Scanning your ZIP locally…' : 'Preview will appear after scan'}
+            {scanning ? 'Scanning your ZIP locally…' : 'Sample report preview'}
           </h2>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">Static preflight</span>

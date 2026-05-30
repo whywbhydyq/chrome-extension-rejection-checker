@@ -28,6 +28,7 @@ export function toMarkdownReport(report: ScanReport): string {
     if (finding.line) lines.push(`- Line: ${finding.line}`)
     if (finding.snippet) lines.push(`- Snippet: ${finding.snippet}`)
     lines.push(`- Severity: ${finding.severity}`)
+    if (finding.confidence) lines.push(`- Confidence: ${finding.confidence}`)
     lines.push(`- Reason: ${finding.reason}`)
     lines.push(`- Recommendation: ${finding.recommendation}`)
     if (finding.sourceUrl) lines.push(`- Source: ${finding.sourceUrl}`)

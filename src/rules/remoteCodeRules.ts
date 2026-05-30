@@ -6,6 +6,15 @@ const remoteUrlPattern = /(?:https?:)?\/\/[^\s'"`<>)]+/gi
 const remoteCodeUrlPattern = /(?:https?:)?\/\/[^\s'"`<>)]+\.(?:js|mjs|cjs|wasm)(?:[?#][^\s'"`<>)]+)?/i
 const lowRemoteUrlExtensions = new Set(['.js', '.mjs', '.cjs', '.html', '.htm', '.css'])
 
+function confidenceForFile(file: VirtualFile, highConfidence: string): string {
+  if (/(^|\/)(?:test|tests|__tests__|fixtures?|docs?)\//i.test(file.normalizedPath) || /(?:\.test|\.spec|\.fixture)\.[cm]?js$/i.test(file.normalizedPath) || file.normalizedPath.endsWith('.map')) {
+    return `possible non-runtime context; verify whether ${file.normalizedPath} is included in the production extension package`
+  }
+  return highConfidence
+}
+
+const highConfidenceRemoteCodeContextPattern = /(<script\b|importScripts\s*\(|\bimport\s*(?:\(|[^;]*\bfrom\b)|\bnew\s+(?:Shared)?Worker\s*\(|\bserviceWorker\.register\s*\(|\b(?:audioWorklet|paintWorklet|layoutWorklet|animationWorklet)\.addModule\s*\(|WebAssembly\.(?:instantiateStreaming|compileStreaming)|(?:\bsrc|\.src|\bhref|\.href|\bdata|\.data)\s*=|setAttribute\s*\()/i
+
 function high(file: VirtualFile, line: number, snippet: string, title: string, reason: string): Finding {
   return {
     ruleId: 'CWS001',
@@ -17,6 +26,7 @@ function high(file: VirtualFile, line: number, snippet: string, title: string, r
     reason,
     recommendation: 'Bundle executable code inside the extension ZIP and reference local files instead of remote URLs.',
     sourceUrl,
+    confidence: confidenceForFile(file, 'high-confidence executable loading pattern'),
   }
 }
 
@@ -31,6 +41,7 @@ function dynamicCode(file: VirtualFile, line: number, snippet: string, title: st
     reason,
     recommendation: 'Replace dynamic string execution with normal functions, static imports, bundled modules, or a narrow local command map.',
     sourceUrl: 'https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy',
+    confidence: confidenceForFile(file, 'high-confidence dynamic code pattern'),
   }
 }
 
@@ -114,6 +125,9 @@ function scanJs(file: VirtualFile): Finding[] {
     { pattern: /\bnew\s+Function\s*\(/gi, title: 'Function constructor found', reason: 'The Function constructor creates code from strings.' },
     { pattern: /\bsetTimeout\s*\(\s*["'`]/gi, title: 'String-based timer found', reason: 'Passing a string to a timer executes that string as code.' },
     { pattern: /\bsetInterval\s*\(\s*["'`]/gi, title: 'String-based interval found', reason: 'Passing a string to an interval executes that string as code.' },
+    { pattern: /\bsetImmediate\s*\(\s*["'`]/gi, title: 'String-based immediate callback found', reason: 'Passing a string to a timer-like callback can execute that string as code in legacy or polyfilled runtimes.' },
+    { pattern: /\b(?:chrome|browser)\.tabs\.executeScript\s*\([^)]*\bcode\s*:/gis, title: 'Legacy tabs.executeScript code injection found', reason: 'Legacy extension code injection with a code string is associated with MV2 migration and remote-review problems.' },
+    { pattern: /\bchrome\.devtools\.inspectedWindow\.eval\s*\(/gi, title: 'DevTools inspectedWindow.eval found', reason: 'DevTools inspectedWindow.eval evaluates strings and should be manually reviewed for remote or user-controlled code paths.' },
   ]
 
   for (const item of dynamicExecutionPatterns) {
@@ -136,20 +150,26 @@ function scanRemoteUrls(context: ScannerContext): Finding[] {
     if (!file.text || !shouldLowScan(file)) continue
     for (const match of findMatches(file.text, remoteUrlPattern)) {
       const url = match.match[0]
-      if (remoteCodeUrlPattern.test(url)) continue
-      const key = `${file.normalizedPath}:${match.line}:${url}`
+      const looksExecutable = remoteCodeUrlPattern.test(url)
+      if (looksExecutable && highConfidenceRemoteCodeContextPattern.test(match.snippet)) continue
+      const key = `${file.normalizedPath}:${match.line}:${url}:${looksExecutable ? 'executable' : 'remote'}`
       if (seen.has(key)) continue
       seen.add(key)
       findings.push({
         ruleId: 'CWS010',
-        severity: 'low',
-        title: 'Remote URL found for manual review',
+        severity: looksExecutable ? 'medium' : 'low',
+        title: looksExecutable ? 'Remote executable URL string found for manual review' : 'Remote URL found for manual review',
         file: file.normalizedPath,
         line: match.line,
         snippet: match.snippet,
-        reason: 'A remote URL was found in an executable or web resource file. It may be a normal API, image, JSON, CSS, documentation URL, or a dynamically assembled executable URL.',
-        recommendation: 'Confirm that this URL is not used to load, assemble, interpret, or execute JavaScript or WebAssembly.',
+        reason: looksExecutable
+          ? 'A remote JavaScript or WebAssembly URL was found outside a high-confidence loading pattern. It may be a harmless string, but it can also be used later to assemble or load remote executable code.'
+          : 'A remote URL was found in an executable or web resource file. It may be a normal API, image, JSON, CSS, documentation URL, or a dynamically assembled executable URL.',
+        recommendation: looksExecutable
+          ? 'Confirm that this URL is not later assigned to a loader, passed into a Worker/import path, fetched and evaluated, or interpreted as executable code. Bundle executable code locally inside the ZIP.'
+          : 'Confirm that this URL is not used to load, assemble, interpret, or execute JavaScript or WebAssembly.',
         sourceUrl,
+        confidence: looksExecutable ? confidenceForFile(file, 'manual-review executable URL string') : confidenceForFile(file, 'manual-review remote URL string'),
       })
     }
   }

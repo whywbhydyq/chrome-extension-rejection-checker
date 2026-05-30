@@ -27,6 +27,10 @@ describe('runRemoteCodeRules', () => {
     expect(findings.some((finding) => finding.ruleId === 'CWS001')).toBe(true)
   })
 
+  it('flags standalone remote JavaScript URLs for manual review instead of dropping them', () => {
+    const findings = runRemoteCodeRules(ctx([vf('content.js', 'const maybeLoader = "https://cdn.example.com/app.js"')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS010' && finding.severity === 'medium')).toBe(true)
+  })
 
 
   it('flags protocol-relative remote script tags as CWS001', () => {
@@ -58,6 +62,17 @@ describe('runRemoteCodeRules', () => {
     const findings = runRemoteCodeRules(ctx([vf('content.js', 'new Function("return 1")')]))
     expect(findings.some((finding) => finding.ruleId === 'CWS002')).toBe(true)
   })
+
+  it('flags legacy tabs.executeScript code injection as CWS002', () => {
+    const findings = runRemoteCodeRules(ctx([vf('background.js', 'chrome.tabs.executeScript(tabId, { code: "alert(1)" })')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS002' && finding.title.includes('executeScript'))).toBe(true)
+  })
+
+  it('adds confidence notes for possible non-runtime fixture files', () => {
+    const findings = runRemoteCodeRules(ctx([vf('fixtures/example.js', 'const worker = new Worker("https://cdn.example.com/worker.js")')]))
+    expect(findings.some((finding) => finding.confidence?.includes('possible non-runtime context'))).toBe(true)
+  })
+
 
   it('does not treat manifest host permissions as CWS010', () => {
     const findings = runRemoteCodeRules(ctx([vf('manifest.json', '{"host_permissions":["https://example.com/*"]}')]))
