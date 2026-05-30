@@ -27,7 +27,7 @@ const officialSources = [
   {
     href: 'https://developer.chrome.com/docs/webstore/program-policies/permissions',
     title: 'Chrome Web Store permissions policy',
-    description: 'Documents the narrowest-permissions principle used by the scanner's permission review reminders.',
+    description: "Documents the narrowest-permissions principle used by the scanner's permission review reminders.",
   },
 ]
 
