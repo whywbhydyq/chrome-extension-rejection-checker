@@ -3,6 +3,7 @@ import { EmptyState } from '../components/EmptyState'
 import { FindingList } from '../components/FindingList'
 import { HeroSection } from '../components/HeroSection'
 import { ManualChecklist } from '../components/ManualChecklist'
+import { SampleReportPreview } from '../components/SampleReportPreview'
 import { ScanSummary } from '../components/ScanSummary'
 import { SeoContent } from '../components/SeoContent'
 import { SeverityGuide } from '../components/SeverityGuide'
@@ -46,6 +47,8 @@ export function App() {
         high_count: nextReport.summary.high,
         medium_count: nextReport.summary.medium,
         low_count: nextReport.summary.low,
+        rules_version: nextReport.rulesVersion,
+        partial_scan: nextReport.scanLimits.length > 0,
       })
       if (nextReport.summary.high > 0) {
         trackEvent('high_finding_detected', {
@@ -68,21 +71,27 @@ export function App() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-950">
-      <section className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:py-10">
+      <section className="mx-auto max-w-6xl">
         <HeroSection />
-        <UploadZone scanning={scanning} onFile={(file) => void scan(file)} />
 
-        <div className="mx-auto mt-5 max-w-3xl rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-100">
-          Packaging tip: when submitting to Chrome Web Store, zip the files inside your extension folder so manifest.json is at the ZIP root.
-        </div>
+        <section className="mt-8 grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]" aria-label="Local ZIP scanner workbench">
+          <div className="space-y-4">
+            <UploadZone scanning={scanning} onFile={(file) => void scan(file)} />
 
-        {scanning && <p className="mt-4 text-center text-sm text-slate-600" role="status" aria-live="polite">Scanning locally…</p>}
-        {error && <p className="mx-auto mt-4 max-w-3xl rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-700" role="alert">{error}</p>}
+            <div className="rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-100">
+              Packaging tip: when submitting to Chrome Web Store, zip the files inside your extension folder so manifest.json is at the ZIP root.
+            </div>
+
+            {scanning && <p className="text-sm text-slate-600" role="status" aria-live="polite">Scanning locally in this browser…</p>}
+            {error && <p className="rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-700" role="alert">{error}</p>}
+          </div>
+
+          {report ? <ScanSummary report={report} copied={copied} onCopied={handleCopied} /> : <SampleReportPreview scanning={scanning} />}
+        </section>
 
         {report && (
-          <section className="mt-10 space-y-6" aria-label="Scan results">
-            <ScanSummary report={report} copied={copied} onCopied={handleCopied} />
+          <section className="mt-8 space-y-6" aria-label="Detailed scan results">
             {report.findings.length === 0 ? <EmptyState /> : <FindingList report={report} />}
             <ManualChecklist items={report.manualChecklist} />
           </section>

@@ -1,13 +1,13 @@
 [
   {
     "path": "/chrome-web-store-rejection-checker",
-    "eyebrow": "Chrome Web Store rejection checker",
-    "title": "Free local Chrome Web Store rejection checker",
-    "description": "Scan a Chrome extension ZIP locally before submission and catch common Manifest V3 rejection risks without uploading source code.",
+    "eyebrow": "Chrome Web Store rejection guide",
+    "title": "How to check a Chrome Web Store rejection before resubmission",
+    "description": "Use a local MV3 ZIP scan, official policy checks, and a manual review checklist to debug Chrome Web Store rejection risks before resubmitting.",
     "sections": [
       {
-        "heading": "What the checker scans",
-        "body": "The scanner reads manifest.json, manifest file references, extension pages, JavaScript files, CSP, permissions, icon declarations, and privacy-review signals. It is built for the final production ZIP, not only the source folder."
+        "heading": "Start with the submitted ZIP, then read the rejection email",
+        "body": "This guide explains how to use the local scanner as one step in a rejection workflow. The scanner reads manifest.json, referenced files, extension pages, JavaScript files, CSP, permissions, icons, and privacy-review signals in the final production ZIP."
       },
       {
         "heading": "When to use it",
@@ -42,7 +42,7 @@
     "faqs": [
       {
         "question": "Is this an official Chrome Web Store validator?",
-        "answer": "No. It is a local static preflight checker for common package-level rejection risks. Chrome Web Store review can include additional policy, metadata, privacy, and behavior checks."
+        "answer": "No. It is an independent local static preflight checker for common package-level rejection risks. Chrome Web Store review can include additional policy, metadata, privacy, and behavior checks."
       },
       {
         "question": "Should I scan source code or the release ZIP?",
@@ -432,7 +432,7 @@
     "sections": [
       {
         "heading": "Your ZIP stays in the browser",
-        "body": "The scanner reads the selected ZIP with browser APIs and produces a local static report. It does not need an account, server upload, or Chrome Web Store login."
+        "body": "The scanner reads the selected ZIP with browser APIs and produces a local static report. It does not need an account, server upload, or Chrome Web Store login. The scanner should not transmit ZIP names, file paths, manifest content, source snippets, detected URLs, or package contents."
       },
       {
         "heading": "What the report uses",
@@ -440,24 +440,25 @@
       },
       {
         "heading": "What analytics must not collect",
-        "body": "Analytics should not send source code, manifest content, snippets, file names, file paths, package names, extension IDs, or ZIP contents. Only aggregate event counts and severity totals should be tracked."
+        "body": "Analytics should not send source code, manifest content, snippets, file names, file paths, package names, extension IDs, ZIP names, detected URLs, or ZIP contents. Only aggregate event counts, severity totals, partial-scan status, and rules_version should be tracked."
       }
     ],
     "checklist": [
       "Do not upload source code.",
-      "Do not collect file paths or snippets in analytics.",
+      "Do not collect ZIP names, file paths, source snippets, detected URLs, or manifest content in analytics.",
       "Do not store ZIP contents.",
+      "Keep ads and third-party scripts away from the upload, scan, copy, and download flow.",
       "Do not claim Chrome Web Store approval is guaranteed.",
       "Use the scanner as a local preflight check, not a legal or official validation result."
     ],
     "examples": [
       {
         "title": "Safe analytics event",
-        "body": "scan_success with high_count, medium_count, low_count, and rules_version is acceptable because it is aggregate diagnostic data."
+        "body": "scan_success with high_count, medium_count, low_count, partial_scan, and rules_version is acceptable because it is aggregate diagnostic data."
       },
       {
         "title": "Unsafe analytics event",
-        "body": "Sending manifest.json, source snippets, file names, or detected URLs would expose extension implementation details and should be avoided."
+        "body": "Sending manifest.json, source snippets, ZIP names, file names, detected URLs, or file paths would expose extension implementation details and should be avoided."
       },
       {
         "title": "User-facing trust copy",
@@ -467,7 +468,7 @@
     "faqs": [
       {
         "question": "Does the scanner upload my extension ZIP?",
-        "answer": "No. The intended product behavior is browser-only scanning. Your ZIP should be read locally to generate a static report."
+        "answer": "No. The intended product behavior is browser-only scanning. Your ZIP should be read locally to generate a static report, and analytics should not receive ZIP names, file paths, source snippets, detected URLs, or manifest content."
       },
       {
         "question": "Does the scanner store source code?",
@@ -501,7 +502,7 @@
     "sections": [
       {
         "heading": "Static package analysis",
-        "body": "The scanner inspects the ZIP package structure and text files. It checks manifest location, manifest version, referenced files, extension pages, JavaScript patterns, CSP declarations, permissions, privacy signals, and icons."
+        "body": "The scanner inspects the ZIP package structure and text files. It checks manifest location, manifest version, referenced files, extension pages, JavaScript patterns, CSP script-src/worker-src/object-src, permissions, privacy signals, and icons."
       },
       {
         "heading": "Rule severity",
@@ -509,7 +510,7 @@
       },
       {
         "heading": "Limits",
-        "body": "The scanner does not execute the extension, inspect Chrome Web Store Developer Dashboard fields, detect malware, audit runtime behavior, or guarantee approval. Always review the official policies and your final listing."
+        "body": "The scanner does not execute the extension, inspect Chrome Web Store Developer Dashboard fields, detect malware, audit runtime behavior, deobfuscate every possible dynamic URL construction, or guarantee approval. Large or unreadable files are skipped with partial-scan notes."
       }
     ],
     "checklist": [
@@ -518,7 +519,8 @@
       "Review Medium findings for permissions, privacy, icons, and listing clarity.",
       "Use Low findings as manual review prompts.",
       "Rebuild after changes and scan the rebuilt ZIP.",
-      "Keep reviewer notes aligned with the final package."
+      "Keep reviewer notes aligned with the final package.",
+      "Review partial-scan notes when large files are skipped by browser safety limits."
     ],
     "examples": [
       {

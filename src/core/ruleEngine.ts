@@ -6,6 +6,8 @@ import { runPermissionRules } from '../rules/permissionRules'
 import { runPrivacyRules } from '../rules/privacyRules'
 import { runRemoteCodeRules } from '../rules/remoteCodeRules'
 
+export const rulesVersion = '2026-05-30-mv3-static-rules'
+
 export type RuleRunner = (context: ScannerContext) => Finding[]
 
 const ruleRunners: RuleRunner[] = [
@@ -17,8 +19,19 @@ const ruleRunners: RuleRunner[] = [
   runIconRules,
 ]
 
+function scanLimitToFinding(limit: ScannerContext['scanLimits'][number]): Finding {
+  return {
+    ruleId: limit.code,
+    severity: limit.severity,
+    title: limit.title,
+    file: limit.file,
+    reason: limit.reason,
+    recommendation: limit.recommendation,
+  }
+}
+
 export function scanContext(context: ScannerContext): ScanReport {
-  const findings = ruleRunners.flatMap((runner) => runner(context))
+  const findings = [...context.scanLimits.map(scanLimitToFinding), ...ruleRunners.flatMap((runner) => runner(context))]
   const summary = {
     total: findings.length,
     high: findings.filter((finding) => finding.severity === 'high').length,
@@ -41,5 +54,7 @@ export function scanContext(context: ScannerContext): ScanReport {
       { title: 'Version number and release notes', description: 'Confirm the submitted manifest version, package contents, release notes, and reviewer notes all describe the intended release.' },
       { title: 'Account and item policy compliance', description: 'Review account standing, item policy requirements, branding, impersonation, user data, ads, and prohibited content requirements outside the ZIP scanner.' },
     ],
+    rulesVersion,
+    scanLimits: context.scanLimits,
   }
 }

@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Chrome Web Store Rejection Checker for MV3 ZIP Files</title>
+    <title>Chrome Extension Rejection Checker – Local MV3 ZIP Scan</title>
     <meta
       name="description"
-      content="Check a Manifest V3 Chrome extension ZIP for common Chrome Web Store rejection risks including remote hosted code, permissions, CSP, manifest fields, and package issues. Runs locally."
+      content="Scan a Manifest V3 Chrome extension ZIP locally for remote hosted code, dynamic execution, CSP, permissions, missing files, package issues, and privacy review reminders."
     />
     <link rel="canonical" href="https://cws.ymirtool.com/" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
@@ -16,17 +16,17 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cws.ymirtool.com/" />
-    <meta property="og:title" content="Chrome Web Store Rejection Checker for MV3 ZIP Files" />
+    <meta property="og:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scan" />
     <meta
       property="og:description"
-      content="Check your Manifest V3 extension ZIP locally before Chrome Web Store submission. Detect remote hosted code, CSP, permissions, manifest, and package risks without uploading source code."
+      content="Scan your final Manifest V3 extension ZIP locally before Chrome Web Store submission. Detect remote hosted code, CSP, permissions, manifest, package, and privacy review risks without uploading source code."
     />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Chrome Web Store Rejection Checker for MV3 ZIP Files" />
+    <meta name="twitter:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scan" />
     <meta
       name="twitter:description"
-      content="Run a local MV3 ZIP preflight scan for common Chrome Web Store rejection risks. No upload, no signup."
+      content="Run a local MV3 ZIP preflight scan before Chrome Web Store submission. No source upload, no signup."
     />
 
     <script type="application/ld+json">
@@ -46,8 +46,9 @@
         "featureList": [
           "Local ZIP scan",
           "Manifest V3 preflight check",
-          "Remote hosted code detection",
+          "Remote hosted code detection for scripts, workers, imports, worklets, and WebAssembly",
           "Dynamic code execution detection",
+          "CSP script-src, worker-src, and object-src checks",
           "Broad permissions review",
           "Privacy disclosure reminders"
         ]
@@ -85,15 +86,14 @@
         ]
       }
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1653188471819736" crossorigin="anonymous"></script>
-  </head>
+      </head>
   <body>
     <div id="root">
       <main style="max-width:960px;margin:0 auto;padding:48px 16px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a;line-height:1.6">
         <section>
           <p style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Local Manifest V3 preflight scanner</p>
-          <h1 style="font-size:42px;line-height:1.05;margin:12px 0 16px">Chrome Web Store Rejection Checker</h1>
-          <p style="max-width:720px;color:#475569">Scan a Chrome extension ZIP locally for common Chrome Web Store rejection risks before submission. The tool checks package structure, manifest references, remote hosted code signals, dynamic code execution, CSP, permissions, icons, and privacy review reminders.</p>
+          <h1 style="font-size:42px;line-height:1.05;margin:12px 0 16px">Chrome Extension Rejection Checker</h1>
+          <p style="max-width:720px;color:#475569">Scan a Chrome extension ZIP locally before Chrome Web Store submission. The tool checks package structure, manifest references, remote hosted code signals, dynamic code execution, CSP, permissions, icons, and privacy review reminders without uploading source code.</p>
         </section>
         <section aria-label="Scanner trust notes" style="margin-top:28px">
           <h2 style="font-size:24px;margin-bottom:12px">What makes this tool review-ready</h2>

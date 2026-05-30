@@ -19,6 +19,7 @@ function ctx(manifest: Record<string, unknown> | undefined, files: VirtualFile[]
     textFiles: files.filter((file) => file.isText),
     jsFiles: [],
     htmlFiles: [],
+    scanLimits: [],
   }
 }
 

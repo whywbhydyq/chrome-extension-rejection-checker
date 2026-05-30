@@ -17,6 +17,7 @@ function ctx(files: VirtualFile[]): ScannerContext {
     textFiles: files,
     jsFiles: files.filter((file) => ['.js', '.mjs', '.cjs'].includes(file.extension)),
     htmlFiles: files.filter((file) => ['.html', '.htm'].includes(file.extension)),
+    scanLimits: [],
   }
 }
 
@@ -24,6 +25,18 @@ describe('runRemoteCodeRules', () => {
   it('flags remote script tags as CWS001', () => {
     const findings = runRemoteCodeRules(ctx([vf('popup.html', '<script src="https://example.com/app.js"></script>')]))
     expect(findings.some((finding) => finding.ruleId === 'CWS001')).toBe(true)
+  })
+
+
+
+  it('flags protocol-relative remote script tags as CWS001', () => {
+    const findings = runRemoteCodeRules(ctx([vf('popup.html', '<script src="//cdn.example.com/app.js"></script>')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001')).toBe(true)
+  })
+
+  it('flags remote Worker scripts as CWS001', () => {
+    const findings = runRemoteCodeRules(ctx([vf('content.js', 'const worker = new Worker("https://cdn.example.com/worker.js")')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001' && finding.title.includes('Worker'))).toBe(true)
   })
 
   it('flags importScripts from remote URLs as CWS001', () => {

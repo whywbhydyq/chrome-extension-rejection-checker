@@ -12,6 +12,17 @@ export type Finding = {
   sourceUrl?: string
 }
 
+export type ScanLimit = {
+  code: string
+  severity: Severity
+  title: string
+  file?: string
+  size?: number
+  reason: string
+  recommendation: string
+}
+
+
 export type VirtualFile = {
   path: string
   normalizedPath: string
@@ -34,6 +45,7 @@ export type ScannerContext = {
   textFiles: VirtualFile[]
   jsFiles: VirtualFile[]
   htmlFiles: VirtualFile[]
+  scanLimits: ScanLimit[]
 }
 
 export type ScanSummary = {
@@ -55,4 +67,6 @@ export type ScanReport = {
   summary: ScanSummary
   findings: Finding[]
   manualChecklist: ManualChecklistItem[]
+  rulesVersion: string
+  scanLimits: ScanLimit[]
 }

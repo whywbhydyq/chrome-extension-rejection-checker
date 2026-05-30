@@ -7,6 +7,7 @@ export function toMarkdownReport(report: ScanReport): string {
     `- ZIP: ${report.zipName}`,
     `- Scanned at: ${report.scannedAt}`,
     `- Manifest: ${report.manifestPath ?? 'Not found'}`,
+    `- Rules version: ${report.rulesVersion}`,
     `- Summary: ${report.summary.high} High, ${report.summary.medium} Medium, ${report.summary.low} Low`,
     '',
     '> Static preflight scan only. Not an official Chrome Web Store validator.',
@@ -16,6 +17,10 @@ export function toMarkdownReport(report: ScanReport): string {
   ]
 
   if (report.findings.length === 0) lines.push('No findings detected by the current static rules.', '')
+
+  if (report.scanLimits.length > 0) {
+    lines.push('Some files were skipped or partially read because they exceeded local browser safety limits.', '')
+  }
 
   for (const finding of report.findings) {
     lines.push(`### ${finding.ruleId}: ${finding.title}`)
@@ -39,6 +44,7 @@ export function toFixChecklist(report: ScanReport): string {
     '# Chrome Extension Fix Checklist',
     '',
     `Summary: ${report.summary.high} High, ${report.summary.medium} Medium, ${report.summary.low} Low`,
+    `Rules version: ${report.rulesVersion}`,
     '',
     'Fix high-risk findings first, rebuild the production ZIP, then scan the rebuilt ZIP again.',
     '',
@@ -59,7 +65,7 @@ export function toFixChecklist(report: ScanReport): string {
     for (const item of report.manualChecklist) lines.push(`- [ ] ${item.title}: ${item.description}`)
   }
 
-  lines.push('', 'Note: This is a local static preflight scan, not an official Chrome Web Store validator.')
+  lines.push('', 'Note: This is a local static preflight scan, not an official Chrome Web Store validator. Clean results still require manual review of runtime behavior, store listing, privacy disclosures, and Developer Dashboard fields.')
   return lines.join('\n')
 }
 

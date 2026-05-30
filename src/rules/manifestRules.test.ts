@@ -18,6 +18,7 @@ function ctx(params: Partial<ScannerContext>): ScannerContext {
     textFiles: allFiles,
     jsFiles: [],
     htmlFiles: [],
+    scanLimits: [],
     ...params,
   }
 }

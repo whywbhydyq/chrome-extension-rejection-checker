@@ -14,6 +14,7 @@ function ctx(manifest: Record<string, unknown> | undefined): ScannerContext {
     textFiles: [],
     jsFiles: [],
     htmlFiles: [],
+    scanLimits: [],
   }
 }
 

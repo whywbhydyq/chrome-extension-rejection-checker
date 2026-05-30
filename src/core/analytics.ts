@@ -1,7 +1,7 @@
 type AnalyticsParams = Record<string, string | number | boolean | undefined>
 
-const contentVersion = '2026-05-23'
-const rulesVersion = '2026-05-23-mv3-static-rules'
+const contentVersion = '2026-05-30'
+const rulesVersion = '2026-05-30-mv3-static-rules'
 
 declare global {
   interface Window {
