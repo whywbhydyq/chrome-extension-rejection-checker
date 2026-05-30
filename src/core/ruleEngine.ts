@@ -19,19 +19,8 @@ const ruleRunners: RuleRunner[] = [
   runIconRules,
 ]
 
-function scanLimitToFinding(limit: ScannerContext['scanLimits'][number]): Finding {
-  return {
-    ruleId: limit.code,
-    severity: limit.severity,
-    title: limit.title,
-    file: limit.file,
-    reason: limit.reason,
-    recommendation: limit.recommendation,
-  }
-}
-
 export function scanContext(context: ScannerContext): ScanReport {
-  const findings = [...context.scanLimits.map(scanLimitToFinding), ...ruleRunners.flatMap((runner) => runner(context))]
+  const findings = ruleRunners.flatMap((runner) => runner(context))
   const summary = {
     total: findings.length,
     high: findings.filter((finding) => finding.severity === 'high').length,

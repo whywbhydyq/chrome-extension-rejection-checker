@@ -110,6 +110,21 @@ function finding(review: DirectiveReview, csp: string, manifestPath?: string): F
   }
 }
 
+function mixedNoneFinding(csp: string, directive: string, tokens: string[], manifestPath?: string): Finding | undefined {
+  const hasNone = tokens.some((token) => token.toLowerCase() === "'none'")
+  if (!hasNone || tokens.length <= 1) return undefined
+  return {
+    ruleId: 'CWS005',
+    severity: 'medium',
+    title: `Extension CSP mixes 'none' with other ${directive} sources`,
+    file: manifestPath,
+    snippet: `${directive}: ${tokens.join(' ')}\n${csp}`,
+    reason: `The ${directive} directive includes 'none' alongside other source expressions. This is ambiguous and makes the production extension page CSP harder to review accurately.`,
+    recommendation: `Use either ${directive} 'none' by itself or remove 'none' and list only the packaged sources the extension page actually needs.`,
+    sourceUrl,
+  }
+}
+
 function stringCspFormatFinding(csp: string, manifestPath?: string): Finding {
   return {
     ruleId: 'CWS005',
@@ -135,6 +150,44 @@ function sandboxManualReviewFinding(manifest: Record<string, unknown>, manifestP
     recommendation: 'Verify every sandbox page is packaged locally, review its separate sandbox CSP, and make sure sandboxed code does not become a path for remote executable code or user-data leakage.',
     sourceUrl,
   }
+}
+
+function sandboxCspFindings(manifest: Record<string, unknown>, manifestPath?: string): Finding[] {
+  if (!hasSandboxPages(manifest)) return []
+  const sandboxCsp = getSandboxCsp(manifest)
+  if (!sandboxCsp) return []
+  const directives = parseDirectives(sandboxCsp)
+  const sandboxTokens = directives.get('sandbox')
+  const findings: Finding[] = []
+
+  if (!sandboxTokens) {
+    findings.push({
+      ruleId: 'CWS005',
+      severity: 'high',
+      title: 'Sandbox CSP does not include a sandbox directive',
+      file: manifestPath,
+      snippet: `content_security_policy.sandbox: ${sandboxCsp}`,
+      reason: 'Sandbox pages need their own sandbox CSP boundary. Without an explicit sandbox directive, the separate sandbox policy is incomplete for Chrome extension review.',
+      recommendation: 'Add an explicit sandbox directive to content_security_policy.sandbox and keep it separate from extension_pages CSP.',
+      sourceUrl,
+    })
+    return findings
+  }
+
+  if (sandboxTokens.some((token) => token.toLowerCase() === 'allow-same-origin')) {
+    findings.push({
+      ruleId: 'CWS005',
+      severity: 'high',
+      title: 'Sandbox CSP grants allow-same-origin',
+      file: manifestPath,
+      snippet: `sandbox: ${sandboxTokens.join(' ')}\n${sandboxCsp}`,
+      reason: 'Sandbox pages should not use allow-same-origin because it weakens the isolation boundary that separates sandboxed pages from extension pages.',
+      recommendation: 'Remove allow-same-origin from content_security_policy.sandbox and review whether the sandbox page still needs to exist in the submitted package.',
+      sourceUrl,
+    })
+  }
+
+  return findings
 }
 
 function missingObjectSrcFinding(csp: string, manifestPath?: string): Finding {
@@ -168,6 +221,7 @@ export function runCspRules(context: ScannerContext): Finding[] {
 
   if (hasSandboxPages(context.manifest)) {
     findings.push(sandboxManualReviewFinding(context.manifest, context.manifestPath))
+    findings.push(...sandboxCspFindings(context.manifest, context.manifestPath))
   }
 
   for (const csp of getExtensionPageCsp(context.manifest)) {
@@ -179,15 +233,21 @@ export function runCspRules(context: ScannerContext): Finding[] {
 
     const scriptTokens = scriptSrc.length > 0 ? scriptSrc : defaultSrc
     const scriptDirectiveName = scriptSrc.length > 0 ? 'script-src' : 'default-src fallback for script-src'
+    const scriptNoneFinding = mixedNoneFinding(csp, scriptDirectiveName, scriptTokens, context.manifestPath)
+    if (scriptNoneFinding) findings.push(scriptNoneFinding)
     if (scriptTokens.length > 0) findings.push(...reviewDirective(csp, context.manifestPath, scriptDirectiveName, scriptTokens, allowedScriptTokens))
 
     const workerTokens = workerSrc.length > 0 ? workerSrc : scriptSrc.length > 0 ? scriptSrc : defaultSrc
     const workerDirectiveName = workerSrc.length > 0 ? 'worker-src' : scriptSrc.length > 0 ? 'script-src fallback for worker-src' : 'default-src fallback for worker-src'
+    const workerNoneFinding = mixedNoneFinding(csp, workerDirectiveName, workerTokens, context.manifestPath)
+    if (workerNoneFinding) findings.push(workerNoneFinding)
     if (workerTokens.length > 0) findings.push(...reviewDirective(csp, context.manifestPath, workerDirectiveName, workerTokens, allowedWorkerTokens))
 
     if (objectSrc.length === 0) {
       findings.push(missingObjectSrcFinding(csp, context.manifestPath))
     } else {
+      const objectNoneFinding = mixedNoneFinding(csp, 'object-src', objectSrc, context.manifestPath)
+      if (objectNoneFinding) findings.push(objectNoneFinding)
       findings.push(...reviewDirective(csp, context.manifestPath, 'object-src', objectSrc, allowedObjectTokens))
     }
   }

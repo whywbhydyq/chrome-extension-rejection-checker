@@ -12,15 +12,23 @@ export function toMarkdownReport(report: ScanReport): string {
     '',
     '> Static preflight scan only. Not an official Chrome Web Store validator.',
     '',
-    '## Findings',
-    '',
   ]
 
-  if (report.findings.length === 0) lines.push('No findings detected by the current static rules.', '')
-
   if (report.scanLimits.length > 0) {
-    lines.push('Some files were skipped or partially read because they exceeded local browser safety limits.', '')
+    lines.push('## Scan limits', '')
+    lines.push('These are local browser safety notes, not code-policy findings. Review skipped or partially read files manually before submission.', '')
+    for (const limit of report.scanLimits) {
+      lines.push(`- ${limit.severity.toUpperCase()} · ${limit.code}: ${limit.title}`)
+      if (limit.file) lines.push(`  - File: ${limit.file}`)
+      if (limit.size) lines.push(`  - Size: ${limit.size} bytes`)
+      lines.push(`  - Reason: ${limit.reason}`)
+      lines.push(`  - Recommendation: ${limit.recommendation}`)
+    }
+    lines.push('')
   }
+
+  lines.push('## Findings', '')
+  if (report.findings.length === 0) lines.push('No code-policy findings detected by the current static rules.', '')
 
   for (const finding of report.findings) {
     lines.push(`### ${finding.ruleId}: ${finding.title}`)
@@ -52,12 +60,20 @@ export function toFixChecklist(report: ScanReport): string {
   ]
 
   if (report.findings.length === 0) {
-    lines.push('- No static findings detected by the current rules.')
+    lines.push('- No code-policy findings detected by the current rules.')
   } else {
     for (const finding of report.findings) {
       lines.push(`- [ ] ${finding.severity.toUpperCase()} · ${finding.ruleId}: ${finding.title}`)
       if (finding.file) lines.push(`  - Location: ${finding.file}${finding.line ? `:${finding.line}` : ''}`)
       lines.push(`  - Fix: ${finding.recommendation}`)
+    }
+  }
+
+  if (report.scanLimits.length > 0) {
+    lines.push('', 'Scan limit notes, separate from code findings:')
+    for (const limit of report.scanLimits) {
+      lines.push(`- [ ] ${limit.severity.toUpperCase()} · ${limit.code}: ${limit.title}${limit.file ? ` (${limit.file})` : ''}`)
+      lines.push(`  - Review: ${limit.recommendation}`)
     }
   }
 

@@ -56,6 +56,88 @@ function PrivacyAdvertisingDisclosure() {
   )
 }
 
+
+
+function ToolCtaCard({ cta }: { cta?: SeoPageData['toolCta'] }) {
+  if (!cta) return null
+
+  return (
+    <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm md:p-8" aria-labelledby="tool-cta-title">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-300">{cta.eyebrow}</p>
+      <h2 id="tool-cta-title" className="mt-3 text-3xl font-black tracking-tight">{cta.title}</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{cta.body}</p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <a className="rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950" href="/">
+          {cta.primaryLabel}
+        </a>
+        {cta.secondaryLabel && cta.secondaryHref && (
+          <a className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30" href={cta.secondaryHref}>
+            {cta.secondaryLabel}
+          </a>
+        )}
+      </div>
+      <p className="mt-4 text-xs leading-5 text-slate-400">Independent local static preflight only. This is not an official Chrome Web Store validation result.</p>
+    </section>
+  )
+}
+
+function SourceList({ sources }: { sources?: SeoPageData['sources'] }) {
+  if (!sources || sources.length === 0) return null
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="sources-title">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Official sources</p>
+      <h2 id="sources-title" className="mt-3 text-3xl font-black tracking-tight">Sources used for this page</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+        These links are listed so scanner findings and page guidance can be checked against Chrome's source documentation. This site remains an independent preflight tool.
+      </p>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {sources.map((source) => (
+          <a key={source.url} className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100 hover:bg-slate-100" href={source.url} rel="nofollow noopener noreferrer" target="_blank">
+            <h3 className="font-bold text-slate-950">{source.label}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{source.note}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+
+function ContentBlocks({ blocks }: { blocks?: SeoPageData['contentBlocks'] }) {
+  if (!blocks || blocks.length === 0) return null
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="practical-notes-title">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Practical notes</p>
+      <h2 id="practical-notes-title" className="mt-3 text-3xl font-black tracking-tight">How to apply this before resubmission</h2>
+      <div className="mt-6 space-y-5">
+        {blocks.map((block) => (
+          <section key={block.heading} className="rounded-2xl bg-slate-50 p-5">
+            <h3 className="font-bold text-slate-950">{block.heading}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{block.body}</p>
+            {block.bullets && block.bullets.length > 0 && (
+              <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-700">
+                {block.bullets.map((bullet) => (
+                  <li key={bullet} className="flex gap-2">
+                    <span className="font-bold text-slate-950">•</span>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {block.ctaLabel && block.ctaHref && (
+              <a className="mt-4 inline-block text-sm font-semibold underline" href={block.ctaHref}>
+                {block.ctaLabel}
+              </a>
+            )}
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function PolicyFooter() {
   return (
     <footer className="border-t border-slate-200 pt-6 text-sm text-slate-600">
@@ -102,6 +184,8 @@ export function SeoPage({ page }: SeoPageProps) {
           </a>
         </section>
 
+        <ToolCtaCard cta={page.toolCta} />
+
         <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="guide-sections-title">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Guide</p>
           <h2 id="guide-sections-title" className="mt-3 text-3xl font-black tracking-tight">What to check</h2>
@@ -116,6 +200,8 @@ export function SeoPage({ page }: SeoPageProps) {
         </section>
 
         {page.path === '/privacy' && <PrivacyAdvertisingDisclosure />}
+
+        <ContentBlocks blocks={page.contentBlocks} />
 
         <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="checklist-title">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Checklist</p>
@@ -154,6 +240,8 @@ export function SeoPage({ page }: SeoPageProps) {
             ))}
           </div>
         </section>
+
+        <SourceList sources={page.sources} />
 
         <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="related-title">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Related guides</p>

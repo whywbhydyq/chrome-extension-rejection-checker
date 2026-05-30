@@ -30,7 +30,14 @@ export function ScanSummary({ report, copied, onCopied }: ScanSummaryProps) {
         </div>
         {report.scanLimits.length > 0 && (
           <div className="mt-5 rounded-2xl bg-slate-100 p-4 text-sm leading-6 text-slate-700 ring-1 ring-slate-200">
-            Partial scan notice: {report.scanLimits.length} file safety limit {report.scanLimits.length === 1 ? 'note was' : 'notes were'} added. Review skipped or unread files manually before submission.
+            <p className="font-semibold text-slate-900">Partial scan notice</p>
+            <p>{report.scanLimits.length} file safety limit {report.scanLimits.length === 1 ? 'note was' : 'notes were'} kept separate from code findings. Review skipped or unread files manually before submission.</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {report.scanLimits.slice(0, 4).map((limit, index) => (
+                <li key={`${limit.code}-${limit.file ?? index}`}>{limit.title}{limit.file ? `: ${limit.file}` : ''}</li>
+              ))}
+              {report.scanLimits.length > 4 && <li>{report.scanLimits.length - 4} more limit notes are included in the JSON report.</li>}
+            </ul>
           </div>
         )}
         <ReportActions report={report} copied={copied} onCopied={onCopied} />

@@ -1,3 +1,36 @@
+const officialSources = [
+  {
+    href: 'https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code',
+    title: 'Chrome remote hosted code guidance',
+    description: 'Defines remotely hosted code and explains why Manifest V3 extensions should bundle executable JavaScript and WebAssembly inside the package.',
+  },
+  {
+    href: 'https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy',
+    title: 'Manifest V3 content security policy',
+    description: 'Documents extension_pages and sandbox CSP behavior, default policies, and minimum MV3 CSP limits.',
+  },
+  {
+    href: 'https://developer.chrome.com/docs/extensions/reference/manifest/sandbox',
+    title: 'Sandbox page requirements',
+    description: 'Documents sandbox.pages and custom sandbox CSP requirements, including the sandbox directive and allow-same-origin restriction.',
+  },
+  {
+    href: 'https://developer.chrome.com/docs/webstore/prepare',
+    title: 'Chrome Web Store package preparation',
+    description: 'Explains the upload ZIP requirement and the need to place manifest.json at the ZIP root.',
+  },
+  {
+    href: 'https://developer.chrome.com/docs/webstore/cws-dashboard-privacy',
+    title: 'Developer Dashboard privacy fields',
+    description: 'Explains single purpose, permission justification, and privacy-practices fields used during Chrome Web Store review.',
+  },
+  {
+    href: 'https://developer.chrome.com/docs/webstore/program-policies/permissions',
+    title: 'Chrome Web Store permissions policy',
+    description: 'Documents the narrowest-permissions principle used by the scanner's permission review reminders.',
+  },
+]
+
 const relatedGuides = [
   {
     href: '/chrome-web-store-rejection-checker',
@@ -130,6 +163,22 @@ export function SeoContent() {
             <a key={guide.href} href={guide.href} className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100 hover:bg-slate-100">
               <h3 className="font-bold text-slate-950">{guide.title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{guide.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="official-sources-title">
+        <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Official sources</p>
+        <h2 id="official-sources-title" className="mt-3 text-3xl font-black tracking-tight">Chrome documentation this scanner maps to</h2>
+        <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
+          These source links support the scanner's visible rules and page guidance. Use them as the final reference when deciding whether a finding is fixed before resubmission.
+        </p>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {officialSources.map((source) => (
+            <a key={source.href} href={source.href} rel="nofollow noopener noreferrer" target="_blank" className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100 hover:bg-slate-100">
+              <h3 className="font-bold text-slate-950">{source.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{source.description}</p>
             </a>
           ))}
         </div>

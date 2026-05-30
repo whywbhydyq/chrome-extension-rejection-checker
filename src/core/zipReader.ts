@@ -6,6 +6,7 @@ const MAX_ENTRY_COUNT = 5000
 const MAX_TOTAL_UNCOMPRESSED_BYTES = 120 * 1024 * 1024
 const MAX_TEXT_FILE_BYTES = 1.5 * 1024 * 1024
 const MAX_BINARY_PREVIEW_BYTES = 5 * 1024 * 1024
+const MAX_UNKNOWN_SIZE_TEXT_READS = 200
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -20,6 +21,10 @@ function pickManifestPath(paths: string[]): string | undefined {
 
 function shouldReadBytes(path: string, size: number | undefined): boolean {
   return typeof size === 'number' && size <= MAX_BINARY_PREVIEW_BYTES && /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(path)
+}
+
+function isCoreTextScanCandidate(path: string): boolean {
+  return /\.(js|mjs|cjs|json|html|htm|css|svg)$/i.test(path)
 }
 
 function getDeclaredUncompressedSize(entry: unknown): number | undefined {
@@ -70,13 +75,14 @@ export async function readExtensionZip(file: File): Promise<ScannerContext> {
       code: 'ZIP_DECLARED_SIZE_UNKNOWN',
       severity: 'low',
       title: 'Some ZIP entry sizes were not declared',
-      reason: 'The ZIP library did not expose a declared uncompressed size for every entry before reading. Unknown-size non-manifest text files are skipped to avoid zip-bomb style memory pressure.',
-      recommendation: 'Use the generated report as a static preflight result and manually review any unknown-size files that the browser scanner skipped.',
+      reason: 'The ZIP library did not expose a declared uncompressed size for every entry before reading. The browser scanner reads manifest.json and a limited budget of core unknown-size text files, then skips the rest to reduce zip-bomb style memory pressure.',
+      recommendation: 'Use the generated report as a static preflight result and manually review unknown-size files that were outside the limited core-file read budget.',
     }))
   }
 
   const allFiles: VirtualFile[] = []
   let observedReadBytes = 0
+  let unknownSizeTextReads = 0
   for (const entry of entries) {
     const normalized = normalizePath(entry.name)
     let size = getDeclaredUncompressedSize(entry)
@@ -85,24 +91,38 @@ export async function readExtensionZip(file: File): Promise<ScannerContext> {
 
     if (isProbablyText(normalized, size ?? MAX_TEXT_FILE_BYTES + 1)) {
       const isManifestCandidate = normalized === manifestPath
-      if (size === undefined && !isManifestCandidate) {
+      const shouldReadUnknownSizeText = size !== undefined || isManifestCandidate || (isCoreTextScanCandidate(normalized) && unknownSizeTextReads < MAX_UNKNOWN_SIZE_TEXT_READS)
+      if (size === undefined && !shouldReadUnknownSizeText) {
         scanLimits.push(scanLimit({
           code: 'ZIP_TEXT_FILE_SKIPPED_UNKNOWN_SIZE',
           severity: 'medium',
           title: 'Text file skipped because its expanded size was unknown',
           file: normalized,
-          reason: 'The ZIP entry did not expose a declared uncompressed size before reading. To avoid zip-bomb style memory pressure, the browser scanner only reads unknown-size manifest.json entries automatically.',
+          reason: `The ZIP entry did not expose a declared uncompressed size before reading. To avoid zip-bomb style memory pressure, the browser scanner reads only manifest.json and up to ${MAX_UNKNOWN_SIZE_TEXT_READS} unknown-size core text files automatically.`,
           recommendation: 'Repackage the extension with normal ZIP metadata or manually review this file in the final submitted package.',
         }))
       } else if (size === undefined || size <= MAX_TEXT_FILE_BYTES) {
         try {
-          const decodedText = await entry.async('text')
-          const actualTextSize = getTextByteLength(decodedText)
-          size = size ?? actualTextSize
-          observedReadBytes += actualTextSize
-          if (observedReadBytes > MAX_TOTAL_UNCOMPRESSED_BYTES) {
-            throw new Error(`This ZIP decoded more than ${formatBytes(MAX_TOTAL_UNCOMPRESSED_BYTES)} of text content. The local scanner stopped to reduce zip-bomb risk.`)
+          let decodedText: string
+          let actualTextSize: number
+          if (size === undefined) {
+            unknownSizeTextReads += 1
+            const rawTextBytes = await entry.async('uint8array')
+            actualTextSize = rawTextBytes.byteLength
+            observedReadBytes += actualTextSize
+            if (observedReadBytes > MAX_TOTAL_UNCOMPRESSED_BYTES) {
+              throw new Error(`This ZIP decoded more than ${formatBytes(MAX_TOTAL_UNCOMPRESSED_BYTES)} of text content. The local scanner stopped to reduce zip-bomb risk.`)
+            }
+            decodedText = actualTextSize <= MAX_TEXT_FILE_BYTES ? new TextDecoder().decode(rawTextBytes) : ''
+          } else {
+            decodedText = await entry.async('text')
+            actualTextSize = getTextByteLength(decodedText)
+            observedReadBytes += actualTextSize
+            if (observedReadBytes > MAX_TOTAL_UNCOMPRESSED_BYTES) {
+              throw new Error(`This ZIP decoded more than ${formatBytes(MAX_TOTAL_UNCOMPRESSED_BYTES)} of text content. The local scanner stopped to reduce zip-bomb risk.`)
+            }
           }
+          size = size ?? actualTextSize
           if (actualTextSize <= MAX_TEXT_FILE_BYTES) {
             text = decodedText
           } else {

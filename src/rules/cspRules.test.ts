@@ -66,6 +66,22 @@ describe('runCspRules', () => {
     expect(findings.some((finding) => finding.title.includes('Sandbox pages'))).toBe(true)
   })
 
+
+  it("flags 'none' mixed with other extension page sources", () => {
+    const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'none' 'self'; object-src 'self'" } }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes("mixes 'none'"))).toBe(true)
+  })
+
+  it('flags sandbox CSP without a sandbox directive', () => {
+    const findings = runCspRules(ctx({ manifest_version: 3, sandbox: { pages: ['sandbox.html'] }, content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'", sandbox: "script-src 'self'" } }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('does not include a sandbox directive'))).toBe(true)
+  })
+
+  it('flags sandbox CSP with allow-same-origin', () => {
+    const findings = runCspRules(ctx({ manifest_version: 3, sandbox: { pages: ['sandbox.html'] }, content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'", sandbox: "sandbox allow-scripts allow-same-origin; script-src 'self'" } }))
+    expect(findings.some((finding) => finding.ruleId === 'CWS005' && finding.title.includes('allow-same-origin'))).toBe(true)
+  })
+
   it('accepts local-only script-src', () => {
     const findings = runCspRules(ctx({ content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'" } }))
     expect(findings).toHaveLength(0)
