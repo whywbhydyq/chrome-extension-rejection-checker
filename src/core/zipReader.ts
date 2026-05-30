@@ -52,9 +52,9 @@ export async function readExtensionZip(file: File): Promise<ScannerContext> {
     throw new Error(`This ZIP contains ${entries.length} files. The local scanner limit is ${MAX_ENTRY_COUNT} files to avoid freezing the browser.`)
   }
 
-  const declaredSizes = entries.map((entry) => getDeclaredUncompressedSize(entry))
-  const knownTotalUncompressedSize = declaredSizes.reduce((total, size) => total + (size ?? 0), 0)
-  const hasUnknownDeclaredSize = declaredSizes.some((size) => size === undefined)
+  const declaredSizes: Array<number | undefined> = entries.map((entry) => getDeclaredUncompressedSize(entry))
+  const knownTotalUncompressedSize = declaredSizes.reduce<number>((total, size) => total + (size ?? 0), 0)
+  const hasUnknownDeclaredSize = declaredSizes.some((size): size is undefined => size === undefined)
   if (knownTotalUncompressedSize > MAX_TOTAL_UNCOMPRESSED_BYTES) {
     throw new Error(`This ZIP expands to about ${formatBytes(knownTotalUncompressedSize)}. The local scanner limit is ${formatBytes(MAX_TOTAL_UNCOMPRESSED_BYTES)} to reduce zip-bomb risk.`)
   }
