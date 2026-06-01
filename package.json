@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/generate-static-seo-pages.mjs",
+    "build": "node scripts/audit-vercel-routing.mjs && tsc -b && vite build && node scripts/generate-static-seo-pages.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
