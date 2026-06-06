@@ -15,6 +15,9 @@ export function HeroSection() {
         <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">Static preflight only</span>
       </div>
       <p className="mt-3 text-sm text-slate-500">
+        Last updated: <time dateTime="2026-06-06">June 6, 2026</time> · Independent preflight guidance based on public Chrome documentation and local scanner rules.
+      </p>
+      <p className="mt-2 text-sm text-slate-500">
         Not affiliated with Google or Chrome Web Store. Not a guarantee of approval.
       </p>
     </div>

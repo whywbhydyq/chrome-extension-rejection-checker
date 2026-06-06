@@ -7,11 +7,15 @@
     <title>Chrome Extension Rejection Checker – Local MV3 ZIP Scan</title>
     <meta
       name="description"
-      content="Scan a Manifest V3 Chrome extension ZIP locally for remote hosted code, dynamic execution, CSP, permissions, missing files, package issues, and privacy review reminders."
+      content="Scan a Manifest V3 Chrome extension ZIP locally for remote hosted code, eval, CSP, permissions, missing files, package issues, and privacy review risks."
     />
     <link rel="canonical" href="https://cws.ymirtool.com/" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="google-adsense-account" content="ca-pub-1653188471819736" />
 
     <meta property="og:type" content="website" />
@@ -19,8 +23,12 @@
     <meta property="og:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scan" />
     <meta
       property="og:description"
-      content="Scan your final Manifest V3 extension ZIP locally before Chrome Web Store submission. Detect remote hosted code, CSP, permissions, manifest, package, and privacy review risks without uploading source code."
+      content="Scan your final Manifest V3 extension ZIP locally before Chrome Web Store submission. Detect remote hosted code, eval, CSP, permissions, manifest, package, and privacy review risks without uploading source code."
     />
+    <meta property="og:image" content="https://cws.ymirtool.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Chrome Extension Rejection Checker local Manifest V3 ZIP scan" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Chrome Extension Rejection Checker – Local MV3 ZIP Scan" />
@@ -28,60 +36,68 @@
       name="twitter:description"
       content="Run a local MV3 ZIP preflight scan before Chrome Web Store submission. No source upload, no signup."
     />
+    <meta name="twitter:image" content="https://cws.ymirtool.com/og-image.png" />
+    <meta name="twitter:image:alt" content="Chrome Extension Rejection Checker local Manifest V3 ZIP scan" />
 
-    <script type="application/ld+json">
+    <script id="structured-data" type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Chrome Extension Rejection Checker",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Web",
-        "url": "https://cws.ymirtool.com/",
-        "description": "A free local browser-based scanner for Chrome extension Manifest V3 ZIP files before Chrome Web Store submission.",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "featureList": [
-          "Local ZIP scan",
-          "Manifest V3 preflight check",
-          "Remote hosted code detection for scripts, workers, imports, worklets, and WebAssembly",
-          "Dynamic code execution detection",
-          "CSP script-src, worker-src, and object-src checks",
-          "Broad permissions review",
-          "Privacy disclosure reminders"
-        ]
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
+        "@graph": [
           {
-            "@type": "Question",
-            "name": "Does this Chrome extension rejection checker upload my ZIP?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "No. The scan runs locally in your browser. Your Chrome extension ZIP is read on your device and is not uploaded by the tool."
+            "@type": "Organization",
+            "@id": "https://cws.ymirtool.com/#organization",
+            "name": "Chrome Extension Rejection Checker",
+            "url": "https://cws.ymirtool.com/",
+            "logo": "https://cws.ymirtool.com/icon-512.png",
+            "image": "https://cws.ymirtool.com/og-image.png"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://cws.ymirtool.com/#website",
+            "url": "https://cws.ymirtool.com/",
+            "name": "Chrome Extension Rejection Checker",
+            "description": "A local Manifest V3 preflight scanner for Chrome extension ZIP packages before Chrome Web Store submission.",
+            "inLanguage": "en",
+            "publisher": {
+              "@id": "https://cws.ymirtool.com/#organization"
             }
           },
           {
-            "@type": "Question",
-            "name": "Can this tool guarantee Chrome Web Store approval?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "No. It is a static preflight scanner, not an official Chrome Web Store validator. It helps detect common Manifest V3 rejection risks before submission."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What rejection risks does it check?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "It checks for missing or invalid manifest.json, Manifest V3 issues, missing manifest references, remote hosted code, eval and dynamic code execution, unsafe CSP, broad host permissions, sensitive Chrome API permissions, icon paths, and privacy review reminders."
-            }
+            "@type": ["WebApplication", "SoftwareApplication"],
+            "@id": "https://cws.ymirtool.com/#app",
+            "name": "Chrome Extension Rejection Checker",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any modern browser",
+            "url": "https://cws.ymirtool.com/",
+            "description": "A free local browser-based scanner for Chrome extension Manifest V3 ZIP files before Chrome Web Store submission.",
+            "image": "https://cws.ymirtool.com/og-image.png",
+            "isAccessibleForFree": true,
+            "dateModified": "2026-06-06",
+            "softwareVersion": "0.1.0",
+            "browserRequirements": "Requires a modern browser with JavaScript and local File API support.",
+            "publisher": {
+              "@id": "https://cws.ymirtool.com/#organization"
+            },
+            "creator": {
+              "@id": "https://cws.ymirtool.com/#organization"
+            },
+            "mainEntityOfPage": {
+              "@id": "https://cws.ymirtool.com/#website"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "Local ZIP scan",
+              "Manifest V3 preflight check",
+              "Remote hosted code detection for scripts, workers, imports, worklets, and WebAssembly",
+              "Dynamic code execution detection",
+              "CSP script-src, worker-src, and object-src checks",
+              "Broad permissions review",
+              "Privacy disclosure reminders"
+            ]
           }
         ]
       }
@@ -90,28 +106,77 @@
   <body>
     <div id="root">
       <!-- STATIC_ROOT_START -->
-      <main style="max-width:960px;margin:0 auto;padding:48px 16px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a;line-height:1.6">
+      <main style="max-width:1040px;margin:0 auto;padding:48px 16px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a;line-height:1.6">
         <section>
           <p style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Local Manifest V3 preflight scanner</p>
           <h1 style="font-size:42px;line-height:1.05;margin:12px 0 16px">Chrome Extension Rejection Checker</h1>
-          <p style="max-width:720px;color:#475569">Scan a Chrome extension ZIP locally before Chrome Web Store submission. The tool checks package structure, manifest references, remote hosted code signals, dynamic code execution, CSP, permissions, icons, and privacy review reminders without uploading source code.</p>
+          <p style="max-width:760px;color:#475569;font-size:18px">Scan a Chrome extension ZIP locally before Chrome Web Store submission. The tool checks package structure, manifest references, remote hosted code signals, dynamic code execution, CSP, permissions, icons, and privacy review reminders without uploading source code.</p>
+          <p style="max-width:760px;color:#475569">Use the final production ZIP, not a source folder or an unpacked development directory. Chrome Web Store review evaluates the submitted package, so the preflight scan is most useful when it sees the same <code>manifest.json</code>, service worker, content scripts, web accessible resources, icons, and bundled JavaScript files that reviewers will inspect.</p>
+          <p style="max-width:760px;color:#64748b;font-size:14px;font-weight:700">Last updated: <time datetime="2026-06-06">June 6, 2026</time> · Independent preflight guidance based on public Chrome documentation and local scanner rules.</p>
         </section>
-        <section aria-label="Scanner trust notes" style="margin-top:28px">
-          <h2 style="font-size:24px;margin-bottom:12px">What makes this tool review-ready</h2>
+
+        <section aria-label="Scanner trust notes" style="margin-top:32px">
+          <h2 style="font-size:26px;margin-bottom:12px">What makes this scanner review-ready</h2>
           <ul style="padding-left:20px;color:#475569">
             <li>Your ZIP is read in the browser and is not uploaded by the tool.</li>
             <li>The report is a static preflight check, not an official Chrome Web Store approval guarantee.</li>
-            <li>Use the final production ZIP because Chrome Web Store reviews the submitted package.</li>
+            <li>The scanner focuses on common Manifest V3 rejection risks: remotely hosted code, unsafe dynamic execution, missing files, broad permissions, CSP issues, icon mistakes, and privacy disclosure gaps.</li>
+            <li>Findings are grouped by severity so you can fix blocking package and policy problems before resubmission.</li>
           </ul>
         </section>
-        <nav aria-label="Site links" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:28px;font-size:14px">
-          <a href="/chrome-web-store-rejection-checker">Checker guide</a>
+
+        <section aria-label="Local scan visual proof" style="margin-top:32px;border-radius:24px;background:#0f172a;color:white;padding:28px">
+          <p style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1;margin:0">Visual privacy proof</p>
+          <h2 style="font-size:30px;line-height:1.15;margin:12px 0">Your extension package is checked in this browser</h2>
+          <p style="max-width:780px;color:#cbd5e1;margin:0">The scanner follows a local preflight workflow: select the production ZIP, read extension package files in the browser, classify static Chrome Web Store review risks, then follow the matching fix guide before rebuilding and scanning the final package again.</p>
+          <ol style="margin:24px 0 0;padding:0;list-style:none;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">
+            <li style="background:white;color:#0f172a;border-radius:18px;padding:18px"><strong>1. Select the final ZIP</strong><br><span style="color:#475569">Use the same package you plan to submit, with manifest.json at the root.</span></li>
+            <li style="background:white;color:#0f172a;border-radius:18px;padding:18px"><strong>2. Read files locally</strong><br><span style="color:#475569">Manifest, HTML, worker, script, icon, and package metadata are inspected in the browser.</span></li>
+            <li style="background:white;color:#0f172a;border-radius:18px;padding:18px"><strong>3. Classify findings</strong><br><span style="color:#475569">Static rules map remote code, eval, CSP, permissions, and missing references to severity.</span></li>
+            <li style="background:white;color:#0f172a;border-radius:18px;padding:18px"><strong>4. Follow fix guides</strong><br><span style="color:#475569">High-priority findings point to the relevant repair guide before resubmission.</span></li>
+          </ol>
+          <ul style="margin:20px 0 0;padding-left:20px;color:#cbd5e1">
+            <li>No source code, manifest text, snippets, file names, or detected URLs are sent to analytics.</li>
+            <li>Only aggregate events such as finding count, severity count, and guide clicks may be measured.</li>
+          </ul>
+        </section>
+
+        <section aria-label="Checks covered" style="margin-top:32px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+          <article style="border:1px solid #e2e8f0;border-radius:18px;padding:18px;background:#f8fafc">
+            <h2 style="font-size:20px;margin:0 0 8px">Manifest and package checks</h2>
+            <p style="color:#475569;margin:0">The scanner verifies that the ZIP contains a root manifest, uses Manifest V3, resolves declared script and icon paths, and does not look like a packaging mistake where the extension files were nested under an extra folder.</p>
+          </article>
+          <article style="border:1px solid #e2e8f0;border-radius:18px;padding:18px;background:#f8fafc">
+            <h2 style="font-size:20px;margin:0 0 8px">Remote code and dynamic execution</h2>
+            <p style="color:#475569;margin:0">The report flags script loaders, workers, module imports, worklets, WebAssembly loading, <code>eval</code>, <code>new Function</code>, string timers, and CSP patterns that can trigger Manifest V3 review failures.</p>
+          </article>
+          <article style="border:1px solid #e2e8f0;border-radius:18px;padding:18px;background:#f8fafc">
+            <h2 style="font-size:20px;margin:0 0 8px">Permissions and privacy review</h2>
+            <p style="color:#475569;margin:0">Broad host permissions, sensitive Chrome APIs, externally connectable declarations, and data access patterns are highlighted so you can align the package with your Chrome Web Store privacy disclosures.</p>
+          </article>
+        </section>
+
+        <section aria-label="How to use the report" style="margin-top:32px">
+          <h2 style="font-size:26px;margin-bottom:12px">How to use the report before resubmission</h2>
+          <p style="max-width:780px;color:#475569">Start with critical findings that can block review outright, then handle high and medium warnings that may require code bundling, permission narrowing, or clearer privacy disclosures. A clean report does not guarantee approval because Chrome Web Store review also considers behavior, policy context, store listing accuracy, user consent flows, and reviewer interpretation. It does give you a repeatable local checklist for the package-level mistakes that are easy to miss when you are focused on product code.</p>
+          <p style="max-width:780px;color:#475569">If the scanner reports remotely hosted code, move executable JavaScript and WebAssembly into the extension package. If it reports dynamic code execution, replace string execution with static modules or explicit control flow. If it reports broad host permissions, consider optional permissions, narrower match patterns, or a stronger user-facing reason for the requested access.</p>
+        </section>
+
+        <section aria-label="Frequently asked questions" style="margin-top:32px">
+          <h2 style="font-size:26px;margin-bottom:12px">Frequently asked questions</h2>
+          <h3 style="font-size:18px;margin-bottom:6px">Does this tool upload my ZIP?</h3>
+          <p style="max-width:780px;color:#475569">No. The scan runs locally in your browser. Your extension ZIP is read on your device, and the tool does not need a server-side upload to inspect package paths and text files.</p>
+          <h3 style="font-size:18px;margin-bottom:6px">Can this guarantee Chrome Web Store approval?</h3>
+          <p style="max-width:780px;color:#475569">No. It is an independent static preflight scanner. Use it to catch common rejection risks before submission, then review the official Chrome Web Store policies and your actual extension behavior.</p>
+        </section>
+
+        <nav aria-label="Site links" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;font-size:14px">
+          <a href="/guides">All guides</a>
           <a href="/manifest-v3-pre-submission-checklist">MV3 checklist</a>
+          <a href="/fix-remote-hosted-code-manifest-v3">Remote hosted code fix</a>
+          <a href="/chrome-extension-eval-rejection-fix">Eval rejection fix</a>
           <a href="/privacy">Privacy</a>
           <a href="/about">About</a>
-          <a href="/terms">Terms</a>
-          <a href="/disclaimer">Disclaimer</a>
-          <a href="/contact">Contact</a>
         </nav>
       </main>
       <!-- STATIC_ROOT_END -->

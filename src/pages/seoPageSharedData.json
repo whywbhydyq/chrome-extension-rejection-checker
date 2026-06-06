@@ -1,0 +1,102 @@
+{
+  "sources": {
+    "cwsTroubleshooting": {
+      "label": "Chrome Web Store: Troubleshooting violations",
+      "url": "https://developer.chrome.com/docs/webstore/troubleshooting",
+      "note": "Explains how Chrome Web Store rejection and violation references should be interpreted and fixed."
+    },
+    "cwsPrepare": {
+      "label": "Chrome Web Store: Prepare your extension",
+      "url": "https://developer.chrome.com/docs/webstore/prepare",
+      "note": "States that the Chrome Web Store upload ZIP should contain manifest.json at the root, not nested inside a folder."
+    },
+    "remoteHostedCode": {
+      "label": "Chrome Extensions: Deal with remote hosted code violations",
+      "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
+      "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
+    },
+    "programPolicies": {
+      "label": "Chrome Web Store Developer Program Policies",
+      "url": "https://developer.chrome.com/docs/webstore/program-policies/policies",
+      "note": "Sets the broader user trust, transparency, and user data handling policy baseline for Chrome Web Store items."
+    },
+    "cwsPrivacy": {
+      "label": "Chrome Web Store: Fill out the privacy fields",
+      "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
+      "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
+    },
+    "cwsUpdate": {
+      "label": "Chrome Web Store: Update your item",
+      "url": "https://developer.chrome.com/docs/webstore/update",
+      "note": "Explains that changing code or package assets requires uploading a new ZIP and incrementing the extension version."
+    },
+    "mv3Csp": {
+      "label": "Chrome Extensions: Manifest content security policy",
+      "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
+      "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
+    },
+    "mv3Sandbox": {
+      "label": "Chrome Extensions: Manifest sandbox",
+      "url": "https://developer.chrome.com/docs/extensions/reference/manifest/sandbox",
+      "note": "Documents sandbox.pages and the sandbox CSP requirements, including the sandbox directive and allow-same-origin restriction."
+    },
+    "permissionPolicies": {
+      "label": "Chrome Web Store: Permissions policy",
+      "url": "https://developer.chrome.com/docs/webstore/program-policies/permissions",
+      "note": "Describes using only the narrowest permissions required for the extension's current functionality."
+    },
+    "declarePermissions": {
+      "label": "Chrome Extensions: Declare permissions",
+      "url": "https://developer.chrome.com/docs/extensions/develop/concepts/declare-permissions",
+      "note": "Explains permission declarations, optional permissions, and permission warning implications."
+    },
+    "permissionWarnings": {
+      "label": "Chrome Extensions: Permission warning guidelines",
+      "url": "https://developer.chrome.com/docs/extensions/develop/concepts/permission-warnings",
+      "note": "Explains that some extension permissions trigger install-time or runtime warnings."
+    },
+    "activeTab": {
+      "label": "Chrome Extensions: activeTab permission",
+      "url": "https://developer.chrome.com/docs/extensions/develop/concepts/activeTab",
+      "note": "Documents activeTab as temporary user-invoked access that can sometimes replace broad host access."
+    }
+  },
+  "relatedLinks": {
+    "chrome_web_store_rejection_checker": {
+      "href": "/chrome-web-store-rejection-checker",
+      "label": "Chrome Web Store rejection checker workflow"
+    },
+    "manifest_v3_pre_submission_checklist": {
+      "href": "/manifest-v3-pre-submission-checklist",
+      "label": "Manifest V3 pre-submission checklist"
+    },
+    "fix_remote_hosted_code_manifest_v3": {
+      "href": "/fix-remote-hosted-code-manifest-v3",
+      "label": "Fix remote hosted code"
+    },
+    "blue_argon_chrome_extension_error": {
+      "href": "/blue-argon-chrome-extension-error",
+      "label": "Fix Blue Argon rejection"
+    },
+    "chrome_extension_eval_rejection_fix": {
+      "href": "/chrome-extension-eval-rejection-fix",
+      "label": "Fix eval and CSP rejection"
+    },
+    "chrome_extension_host_permissions_privacy_review": {
+      "href": "/chrome-extension-host-permissions-privacy-review",
+      "label": "Permissions and privacy review"
+    },
+    "guides": {
+      "href": "/guides",
+      "label": "All Manifest V3 review guides"
+    },
+    "how_it_works": {
+      "href": "/how-it-works",
+      "label": "How the scanner works"
+    },
+    "privacy": {
+      "href": "/privacy",
+      "label": "Privacy notes"
+    }
+  }
+}

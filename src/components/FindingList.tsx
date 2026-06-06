@@ -1,67 +1,9 @@
 import { trackEvent } from '../core/analytics'
+import { guideForFinding } from '../core/guideLinks'
 import type { ScanReport } from '../core/types'
 
 type FindingListProps = {
   report: ScanReport
-}
-
-type GuideLink = {
-  href: string
-  label: string
-  note: string
-}
-
-const ruleGuideMap: Record<string, GuideLink> = {
-  CWS001: {
-    href: '/fix-remote-hosted-code-manifest-v3',
-    label: 'Fix remote hosted code',
-    note: 'Bundle executable JavaScript or WebAssembly inside the submitted ZIP, then scan the rebuilt package.',
-  },
-  CWS002: {
-    href: '/chrome-extension-eval-rejection-fix',
-    label: 'Replace eval and dynamic code',
-    note: 'Replace string-code execution with explicit functions, static imports, command maps, or structured data.',
-  },
-  CWS003: {
-    href: '/manifest-v3-pre-submission-checklist',
-    label: 'Fix Manifest V3 packaging',
-    note: 'Verify manifest.json is valid, uses Manifest V3, and is located at the ZIP root.',
-  },
-  CWS004: {
-    href: '/manifest-v3-pre-submission-checklist',
-    label: 'Fix missing manifest references',
-    note: 'Add the missing file to the release ZIP or correct the manifest path before resubmitting.',
-  },
-  CWS005: {
-    href: '/chrome-extension-eval-rejection-fix',
-    label: 'Fix extension CSP issues',
-    note: "Remove unsafe script execution and keep extension page script sources local to the package.",
-  },
-  CWS006: {
-    href: '/chrome-extension-host-permissions-privacy-review',
-    label: 'Review broad host permissions',
-    note: 'Use the narrowest host patterns possible, optional permissions, or activeTab when appropriate.',
-  },
-  CWS007: {
-    href: '/chrome-extension-host-permissions-privacy-review',
-    label: 'Justify sensitive permissions',
-    note: 'Confirm each sensitive API supports the extension single purpose and is clearly disclosed.',
-  },
-  CWS008: {
-    href: '/chrome-extension-host-permissions-privacy-review',
-    label: 'Review privacy disclosures',
-    note: 'Check Developer Dashboard privacy fields, policy URL, listing copy, and reviewer notes separately.',
-  },
-  CWS009: {
-    href: '/manifest-v3-pre-submission-checklist',
-    label: 'Fix icon and manifest assets',
-    note: 'Add common icon sizes and make manifest paths match files in the release ZIP.',
-  },
-  CWS010: {
-    href: '/fix-remote-hosted-code-manifest-v3',
-    label: 'Review remote URL usage',
-    note: 'Confirm remote URLs are not used to load or execute JavaScript or WebAssembly.',
-  },
 }
 
 function handleGuideClick(ruleId: string, severity: string, href: string) {
@@ -90,7 +32,7 @@ export function FindingList({ report }: FindingListProps) {
               <p className="mt-1 text-sm text-slate-600">{findings.length} item{findings.length === 1 ? '' : 's'} found.</p>
             </div>
             {findings.map((finding, index) => {
-              const guide = ruleGuideMap[finding.ruleId]
+              const guide = guideForFinding(finding)
               return (
                 <article key={`${finding.ruleId}-${finding.file ?? 'global'}-${index}`} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{finding.severity} · {finding.ruleId}</p>

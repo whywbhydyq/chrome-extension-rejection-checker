@@ -1,4 +1,5 @@
 import type { Finding, ScannerContext, Severity } from '../core/types'
+import { normalizeManifestResourcePath } from '../core/virtualFileSystem'
 
 const manifestSource = 'https://developer.chrome.com/docs/extensions/reference/manifest'
 const prepareSource = 'https://developer.chrome.com/docs/webstore/publish/preparing'
@@ -45,6 +46,10 @@ function isCheckableLocalPath(path: string): boolean {
   if (path.includes('*')) return false
   if (path.startsWith('/')) return false
   return true
+}
+
+function displayNormalizedPath(path: string, normalizedPath: string): string {
+  return path === normalizedPath ? path : `${path} (normalized to ${normalizedPath})`
 }
 
 function collectReferences(manifest: Record<string, unknown>): ManifestRef[] {
@@ -176,14 +181,27 @@ function reviewManifestReference(ref: ManifestRef, context: ScannerContext): Fin
     })
   }
 
-  if (isCheckableLocalPath(ref.path) && !context.files.has(ref.path)) {
+  const normalizedRef = normalizeManifestResourcePath(ref.path)
+  if (normalizedRef.hadTraversal) {
+    return manifestFinding({
+      ruleId: 'CWS004',
+      severity: normalizedRef.escapedRoot ? 'high' : 'medium',
+      title: normalizedRef.escapedRoot ? 'Manifest path escapes the package root' : 'Manifest path contains parent directory traversal',
+      manifestPath: context.manifestPath,
+      snippet,
+      reason: `The manifest field ${ref.label} contains a parent-directory segment. Package resource paths should point to concrete files inside the submitted ZIP.`,
+      recommendation: 'Replace the path with a clean package-relative path that does not contain .. segments.',
+    })
+  }
+
+  if (isCheckableLocalPath(ref.path) && !context.files.has(normalizedRef.path)) {
     return manifestFinding({
       ruleId: 'CWS004',
       severity: 'high',
       title: 'Manifest references a missing file',
       manifestPath: context.manifestPath,
       snippet,
-      reason: `The manifest references ${ref.path}, but that file was not found in the ZIP.`,
+      reason: `The manifest references ${displayNormalizedPath(ref.path, normalizedRef.path)}, but that file was not found in the ZIP.`,
       recommendation: 'Add the missing file or correct the manifest path.',
     })
   }

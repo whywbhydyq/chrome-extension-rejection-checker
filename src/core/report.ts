@@ -1,3 +1,4 @@
+import { guideActionsForFindings, guideForFinding } from './guideLinks'
 import type { ScanReport } from './types'
 
 export function toMarkdownReport(report: ScanReport): string {
@@ -27,6 +28,17 @@ export function toMarkdownReport(report: ScanReport): string {
     lines.push('')
   }
 
+  const suggestedGuides = guideActionsForFindings(report.findings)
+  if (suggestedGuides.length > 0) {
+    lines.push('## Suggested fix path', '')
+    for (const [index, guide] of suggestedGuides.entries()) {
+      lines.push(`${index + 1}. ${guide.label}: ${guide.href}`)
+      lines.push(`   - Matched rules: ${guide.ruleIds.sort().join(', ')}`)
+      lines.push(`   - Why: ${guide.note}`)
+    }
+    lines.push('')
+  }
+
   lines.push('## Findings', '')
   if (report.findings.length === 0) lines.push('No code-policy findings detected by the current static rules.', '')
 
@@ -39,6 +51,8 @@ export function toMarkdownReport(report: ScanReport): string {
     if (finding.confidence) lines.push(`- Confidence: ${finding.confidence}`)
     lines.push(`- Reason: ${finding.reason}`)
     lines.push(`- Recommendation: ${finding.recommendation}`)
+    const guide = guideForFinding(finding)
+    if (guide) lines.push(`- Guide: ${guide.label} (${guide.href})`)
     if (finding.sourceUrl) lines.push(`- Source: ${finding.sourceUrl}`)
     lines.push('')
   }
@@ -63,9 +77,11 @@ export function toFixChecklist(report: ScanReport): string {
     lines.push('- No code-policy findings detected by the current rules.')
   } else {
     for (const finding of report.findings) {
+      const guide = guideForFinding(finding)
       lines.push(`- [ ] ${finding.severity.toUpperCase()} · ${finding.ruleId}: ${finding.title}`)
       if (finding.file) lines.push(`  - Location: ${finding.file}${finding.line ? `:${finding.line}` : ''}`)
       lines.push(`  - Fix: ${finding.recommendation}`)
+      if (guide) lines.push(`  - Guide: ${guide.label} (${guide.href})`)
     }
   }
 
@@ -86,11 +102,18 @@ export function toFixChecklist(report: ScanReport): string {
   return lines.join('\n')
 }
 
+function safeReportFilename(zipName: string): string {
+  const baseName = zipName.replace(/\.zip$/i, '').replace(/[^a-z0-9._-]+/gi, '_').replace(/^_+|_+$/g, '')
+  return `${(baseName || 'extension').slice(0, 80)}-preflight-report.json`
+}
+
 export function downloadJson(report: ScanReport): void {
   const data = JSON.stringify(report, null, 2)
-  const url = `data:application/json;charset=utf-8,${encodeURIComponent(data)}`
+  const blob = new Blob([data], { type: 'application/json;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `${report.zipName.replace(/\.zip$/i, '')}-preflight-report.json`
+  anchor.download = safeReportFilename(report.zipName)
   anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
 }

@@ -1,0 +1,32 @@
+# Chrome Extension Rejection Checker
+> Independent local Manifest V3 ZIP preflight scanner for Chrome Web Store rejection risks. The tool reads extension ZIP files in the browser and does not upload package contents, source code, manifest text, snippets, file names, or detected URLs.
+
+## Primary pages
+- [Local Chrome Extension Rejection Checker](https://cws.ymirtool.com/): Browser-based ZIP scanner for common Manifest V3 package-level rejection risks.
+- [Manifest V3 Review Guides](https://cws.ymirtool.com/guides): Hub for remote hosted code, eval, Blue Argon, permissions, privacy, packaging, and pre-submission workflows.
+- [Chrome Web Store Rejection Checker Workflow](https://cws.ymirtool.com/chrome-web-store-rejection-checker): How to diagnose a rejection using the submitted ZIP and reviewer email.
+- [Manifest V3 Pre-Submission Checklist](https://cws.ymirtool.com/manifest-v3-pre-submission-checklist): Package, manifest, CSP, permissions, privacy, and resubmission checks.
+- [Fix Remote Hosted Code in Manifest V3](https://cws.ymirtool.com/fix-remote-hosted-code-manifest-v3): How to remove executable JavaScript or WASM loaded from outside the extension package.
+- [Fix Blue Argon Chrome Extension Error](https://cws.ymirtool.com/blue-argon-chrome-extension-error): Blue Argon/RHC troubleshooting for generated package output.
+- [Fix eval and Dynamic Code Rejection](https://cws.ymirtool.com/chrome-extension-eval-rejection-fix): Dynamic code execution and CSP review workflow.
+- [Host Permissions and Privacy Review](https://cws.ymirtool.com/chrome-extension-host-permissions-privacy-review): Permission minimization, privacy disclosures, and reviewer-note preparation.
+
+## Trust and policy pages
+- [How it works](https://cws.ymirtool.com/how-it-works): Local scan model, rule coverage, limitations, and privacy boundary.
+- [Privacy](https://cws.ymirtool.com/privacy): What is processed locally and what analytics may collect.
+- [About](https://cws.ymirtool.com/about): Independent project scope and maintenance approach.
+- [Disclaimer](https://cws.ymirtool.com/disclaimer): Static preflight limitations and non-affiliation with Google or Chrome Web Store.
+- [Contact](https://cws.ymirtool.com/contact): Support and issue-reporting guidance.
+
+## Key facts
+- The scanner is independent and not affiliated with Google, Chrome, or Chrome Web Store.
+- The scanner is a static local preflight tool and cannot guarantee Chrome Web Store approval.
+- The recommended workflow is: build final ZIP, scan locally, fix High findings, rescan, then prepare Developer Dashboard review notes.
+- The rule set focuses on package-level signals: manifest location, missing referenced files, remote executable code, dynamic code execution, CSP risks, broad permissions, icons, and privacy-review reminders.
+- Official Chrome documentation and Chrome Web Store reviewer feedback remain the final authority.
+
+## Source basis
+- Chrome Web Store documentation: https://developer.chrome.com/docs/webstore/
+- Chrome Extensions Manifest V3 documentation: https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3
+- Remote hosted code guidance: https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code
+- Chrome Web Store Developer Program Policies: https://developer.chrome.com/docs/webstore/program-policies/policies

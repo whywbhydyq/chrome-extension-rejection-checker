@@ -1,7 +1,8 @@
+import { rulesVersion } from './version'
+
 type AnalyticsParams = Record<string, string | number | boolean | undefined>
 
-const contentVersion = '2026-05-30'
-const rulesVersion = '2026-05-30-mv3-static-rules'
+const contentVersion = '2026-06-06'
 
 declare global {
   interface Window {

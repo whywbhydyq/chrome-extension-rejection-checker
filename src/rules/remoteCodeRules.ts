@@ -4,6 +4,7 @@ import { findMatches } from '../core/lineUtils'
 const sourceUrl = 'https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code'
 const remoteUrlPattern = /(?:https?:)?\/\/[^\s'"`<>)]+/gi
 const remoteCodeUrlPattern = /(?:https?:)?\/\/[^\s'"`<>)]+\.(?:js|mjs|cjs|wasm)(?:[?#][^\s'"`<>)]+)?/i
+const directRemoteLiteralPattern = /(?:["'`](?:https?:)?\/\/[^"'`]+["'`])/i
 const lowRemoteUrlExtensions = new Set(['.js', '.mjs', '.cjs', '.html', '.htm', '.css'])
 
 function confidenceForFile(file: VirtualFile, highConfidence: string): string {
@@ -13,7 +14,7 @@ function confidenceForFile(file: VirtualFile, highConfidence: string): string {
   return highConfidence
 }
 
-const highConfidenceRemoteCodeContextPattern = /(<script\b|importScripts\s*\(|\bimport\s*(?:\(|[^;]*\bfrom\b)|\bnew\s+(?:Shared)?Worker\s*\(|\bserviceWorker\.register\s*\(|\b(?:audioWorklet|paintWorklet|layoutWorklet|animationWorklet)\.addModule\s*\(|WebAssembly\.(?:instantiateStreaming|compileStreaming)|(?:\bsrc|\.src|\bhref|\.href|\bdata|\.data)\s*=|setAttribute\s*\()/i
+const highConfidenceRemoteCodeContextPattern = /(<script\b|importScripts\s*\(|\bimport\s*(?:\(|[^;]*\bfrom\b)|\bnew\s+(?:Shared)?Worker\s*\(|\bserviceWorker\.register\s*\(|\b(?:audioWorklet|paintWorklet|layoutWorklet|animationWorklet)\.addModule\s*\(|WebAssembly\.(?:instantiate|compile|instantiateStreaming|compileStreaming)|(?:\b(?:script|module|worker|wasm|loader|code)[\w$]*\.(?:src|href|data)|setAttribute\s*\(\s*["'](?:src|href|data)["'])|\bfetch\s*\()/i
 
 function high(file: VirtualFile, line: number, snippet: string, title: string, reason: string): Finding {
   return {
@@ -45,6 +46,61 @@ function dynamicCode(file: VirtualFile, line: number, snippet: string, title: st
   }
 }
 
+function hasRemoteLiteral(value: string): boolean {
+  return /(?:https?:)?\/\//i.test(value)
+}
+
+function identifierPattern(identifier: string): RegExp {
+  return new RegExp(`(^|[^\\w$])${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^\\w$]|$)`)
+}
+
+function expressionContainsIdentifier(expression: string, identifiers: Set<string>): boolean {
+  for (const identifier of identifiers) {
+    if (identifierPattern(identifier).test(expression)) return true
+  }
+  return false
+}
+
+function expressionContainsRemoteSignal(expression: string, remoteIdentifiers: Set<string>): boolean {
+  return hasRemoteLiteral(expression) || expressionContainsIdentifier(expression, remoteIdentifiers)
+}
+
+function collectRemoteUrlIdentifiers(text: string): Set<string> {
+  const identifiers = new Set<string>()
+  const declarations = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(["'`])(?:https?:)?\/\/[\s\S]*?\2/g
+  let match: RegExpExecArray | null
+
+  while ((match = declarations.exec(text)) !== null) {
+    identifiers.add(match[1])
+  }
+
+  const assignments = /\b([A-Za-z_$][\w$]*)\s*=\s*(["'`])(?:https?:)?\/\/[\s\S]*?\2/g
+  while ((match = assignments.exec(text)) !== null) {
+    identifiers.add(match[1])
+  }
+
+  return identifiers
+}
+
+function collectRemoteFetchPayloadIdentifiers(text: string, remoteIdentifiers: Set<string>): Set<string> {
+  const identifiers = new Set<string>()
+  const declarations = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?fetch\s*\(([\s\S]{0,220}?)\)(?:\s*\.\s*then\s*\([\s\S]{0,220}?\)){0,4}/g
+  let match: RegExpExecArray | null
+
+  while ((match = declarations.exec(text)) !== null) {
+    if (expressionContainsRemoteSignal(match[2], remoteIdentifiers)) identifiers.add(match[1])
+  }
+
+  return identifiers
+}
+
+function pushUnique(findingList: Finding[], seen: Set<string>, finding: Finding): void {
+  const key = `${finding.ruleId}:${finding.file}:${finding.line}:${finding.title}:${finding.snippet}`
+  if (seen.has(key)) return
+  seen.add(key)
+  findingList.push(finding)
+}
+
 function scanHtml(file: VirtualFile): Finding[] {
   if (!file.text) return []
   const findings: Finding[] = []
@@ -52,7 +108,7 @@ function scanHtml(file: VirtualFile): Finding[] {
     {
       pattern: /<script\b[^>]*\bsrc\s*=\s*(?:["'])?(?:https?:)?\/\/[^\s"'>]+(?:["'])?[^>]*>/gi,
       title: 'Remote script tag found',
-      reason: 'The extension page loads JavaScript from a remote URL.',
+      reason: 'The extension page loads JavaScript from a remote URL. Chrome Web Store treats JavaScript loaded from outside the extension package as remotely hosted code even when the URL has no .js extension.',
     },
   ]
 
@@ -65,45 +121,164 @@ function scanHtml(file: VirtualFile): Finding[] {
   return findings
 }
 
+type LoaderPattern = {
+  pattern: RegExp
+  argumentGroup: number
+  title: string
+  reason: string
+}
+
+function scanRemoteExecutableLoaders(file: VirtualFile, remoteIdentifiers: Set<string>, seen: Set<string>): Finding[] {
+  if (!file.text) return []
+  const findings: Finding[] = []
+  const loaderPatterns: LoaderPattern[] = [
+    {
+      pattern: /importScripts\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote importScripts call found',
+      reason: 'A worker imports executable code from a remote URL. The URL does not need a .js extension to be review-relevant when it is passed to importScripts().',
+    },
+    {
+      pattern: /\bimport\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Dynamic remote module import found',
+      reason: 'The extension dynamically imports a module from a remote URL. Extensionless module URLs and templated CDN URLs can still be remotely hosted code.',
+    },
+    {
+      pattern: /\bnew\s+(?:Shared)?Worker\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote Worker script found',
+      reason: 'The extension creates a Worker or SharedWorker from a remote URL. Worker script URLs are executable loading contexts even without a file extension.',
+    },
+    {
+      pattern: /\bserviceWorker\.register\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote service worker registration found',
+      reason: 'The code registers a service worker script from a remote URL. Service worker registration is an executable loading context.',
+    },
+    {
+      pattern: /\b(?:audioWorklet|paintWorklet|layoutWorklet|animationWorklet)\.addModule\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote worklet module found',
+      reason: 'The code loads a worklet module from a remote URL. Worklet modules are executable loading contexts.',
+    },
+    {
+      pattern: /WebAssembly\.(?:instantiateStreaming|compileStreaming)\s*\(\s*fetch\s*\(([\s\S]{0,500}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote WebAssembly streaming execution path found',
+      reason: 'The extension appears to fetch and execute WebAssembly from a remote URL.',
+    },
+  ]
+
+  for (const item of loaderPatterns) {
+    for (const match of findMatches(file.text, item.pattern)) {
+      const argument = match.match[item.argumentGroup] ?? match.snippet
+      if (!expressionContainsRemoteSignal(argument, remoteIdentifiers)) continue
+      pushUnique(findings, seen, high(file, match.line, match.snippet, item.title, item.reason))
+    }
+  }
+
+  const staticImportPattern = /\bimport\s+(?:[^'"();]+?\s+from\s+)?(["'`][\s\S]{0,300}?["'`])/gi
+  for (const match of findMatches(file.text, staticImportPattern)) {
+    const specifier = match.match[1] ?? match.snippet
+    if (!hasRemoteLiteral(specifier)) continue
+    pushUnique(
+      findings,
+      seen,
+      high(
+        file,
+        match.line,
+        match.snippet,
+        'Remote static import found',
+        'The extension imports a module from a remote URL. Chrome Web Store review evaluates the compiled package, and remote module specifiers are remotely hosted code even when extensionless.',
+      ),
+    )
+  }
+
+  const remoteLoaderAssignmentPatterns: Array<{ pattern: RegExp; title: string; reason: string }> = [
+    {
+      pattern: /\b(?:script|module|worker|sharedWorker|serviceWorker|worklet|wasm|loader|code)[\w$]*\.(?:src|href|data)\s*=\s*([^;\n]+)/gi,
+      title: 'Remote executable loader assignment found',
+      reason: 'The code assigns a remote URL or remote URL variable to an executable-looking loader property.',
+    },
+    {
+      pattern: /\b(?:script|module|worker|sharedWorker|serviceWorker|worklet|wasm|loader|code)[\w$]*\.setAttribute\s*\(\s*["'](?:src|href|data)["']\s*,\s*([\s\S]{0,360}?)\)/gi,
+      title: 'Remote executable setAttribute found',
+      reason: 'The code sets a remote URL or remote URL variable on an executable-looking element attribute.',
+    },
+  ]
+
+  for (const item of remoteLoaderAssignmentPatterns) {
+    for (const match of findMatches(file.text, item.pattern)) {
+      const expression = match.match[1] ?? match.snippet
+      if (!expressionContainsRemoteSignal(expression, remoteIdentifiers)) continue
+      pushUnique(findings, seen, high(file, match.line, match.snippet, item.title, item.reason))
+    }
+  }
+
+  return findings
+}
+
+function scanRemoteFetchExecution(file: VirtualFile, remoteIdentifiers: Set<string>, seen: Set<string>): Finding[] {
+  if (!file.text) return []
+  const findings: Finding[] = []
+  const payloadIdentifiers = collectRemoteFetchPayloadIdentifiers(file.text, remoteIdentifiers)
+
+  const directFetchToSinkPatterns: Array<{ pattern: RegExp; argumentGroup: number; title: string; reason: string }> = [
+    {
+      pattern: /fetch\s*\(([\s\S]{0,220}?)\)(?:\s*\.\s*then\s*\([\s\S]{0,220}?\)){0,5}\s*\.\s*then\s*\(\s*(?:eval|Function|WebAssembly\.(?:instantiate|compile))/gi,
+      argumentGroup: 1,
+      title: 'Remote fetch-to-execution chain found',
+      reason: 'The code fetches a remote resource and chains the result toward eval, Function, or WebAssembly execution. Remote code fetched for execution is remotely hosted code.',
+    },
+    {
+      pattern: /\b(?:eval|new\s+Function|WebAssembly\.(?:instantiate|compile))\s*\(\s*(?:await\s+)?fetch\s*\(([\s\S]{0,220}?)\)/gi,
+      argumentGroup: 1,
+      title: 'Remote fetch executed directly',
+      reason: 'The code appears to execute data fetched directly from a remote URL.',
+    },
+  ]
+
+  for (const item of directFetchToSinkPatterns) {
+    for (const match of findMatches(file.text, item.pattern)) {
+      const argument = match.match[item.argumentGroup] ?? match.snippet
+      if (!expressionContainsRemoteSignal(argument, remoteIdentifiers)) continue
+      pushUnique(findings, seen, high(file, match.line, match.snippet, item.title, item.reason))
+    }
+  }
+
+  if (payloadIdentifiers.size > 0) {
+    const payloadUsePattern = /\b(?:eval|new\s+Function|WebAssembly\.(?:instantiate|compile))\s*\(([\s\S]{0,220}?)\)/gi
+    for (const match of findMatches(file.text, payloadUsePattern)) {
+      const argument = match.match[1] ?? match.snippet
+      if (!expressionContainsIdentifier(argument, payloadIdentifiers)) continue
+      pushUnique(
+        findings,
+        seen,
+        high(
+          file,
+          match.line,
+          match.snippet,
+          'Remote fetched payload executed',
+          'A value populated from fetch(remote URL) is later passed to eval, Function, or WebAssembly execution.',
+        ),
+      )
+    }
+  }
+
+  return findings
+}
+
 function scanJs(file: VirtualFile): Finding[] {
   if (!file.text) return []
   const findings: Finding[] = []
+  const seen = new Set<string>()
+  const remoteIdentifiers = collectRemoteUrlIdentifiers(file.text)
+
+  for (const finding of scanRemoteExecutableLoaders(file, remoteIdentifiers, seen)) findings.push(finding)
+  for (const finding of scanRemoteFetchExecution(file, remoteIdentifiers, seen)) findings.push(finding)
+
   const executableRemotePatterns: Array<{ pattern: RegExp; title: string; reason: string }> = [
-    {
-      pattern: /importScripts\s*\([^)]*(?:https?:)?\/\/[^)]*\.(?:js|mjs|cjs)(?:[?#][^'"`)]*)?[^)]*\)/gi,
-      title: 'Remote importScripts call found',
-      reason: 'A worker imports executable code from a remote URL.',
-    },
-    {
-      pattern: /\bimport\s+(?:[^'"()]+\s+from\s+)?["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs)(?:[?#][^"']*)?["']/gi,
-      title: 'Remote JavaScript import found',
-      reason: 'The extension imports JavaScript from a remote URL.',
-    },
-    {
-      pattern: /\bimport\s*\(\s*["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs)(?:[?#][^"']*)?["']\s*\)/gi,
-      title: 'Dynamic remote JavaScript import found',
-      reason: 'The extension dynamically imports JavaScript from a remote URL.',
-    },
-    {
-      pattern: /\bnew\s+(?:Shared)?Worker\s*\(\s*["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs)(?:[?#][^"']*)?["']/gi,
-      title: 'Remote Worker script found',
-      reason: 'The extension creates a Worker or SharedWorker from a remote JavaScript URL.',
-    },
-    {
-      pattern: /\bserviceWorker\.register\s*\(\s*["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs)(?:[?#][^"']*)?["']/gi,
-      title: 'Remote service worker registration found',
-      reason: 'The code registers a service worker script from a remote JavaScript URL.',
-    },
-    {
-      pattern: /\b(?:audioWorklet|paintWorklet|layoutWorklet|animationWorklet)\.addModule\s*\(\s*["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs)(?:[?#][^"']*)?["']/gi,
-      title: 'Remote worklet module found',
-      reason: 'The code loads a worklet module from a remote JavaScript URL.',
-    },
-    {
-      pattern: /WebAssembly\.(?:instantiateStreaming|compileStreaming)\s*\(\s*fetch\s*\(\s*["'](?:https?:)?\/\/[^"']+\.wasm(?:[?#][^"']*)?["']/gi,
-      title: 'Remote WebAssembly execution path found',
-      reason: 'The extension appears to fetch and execute WebAssembly from a remote URL.',
-    },
     {
       pattern: /(?:\bsrc|\.src|\bhref|\.href|\bdata|\.data)\s*=\s*["'](?:https?:)?\/\/[^"']+\.(?:js|mjs|cjs|wasm)(?:[?#][^"']*)?["']/gi,
       title: 'Remote executable URL assignment found',
@@ -117,7 +292,9 @@ function scanJs(file: VirtualFile): Finding[] {
   ]
 
   for (const item of executableRemotePatterns) {
-    for (const match of findMatches(file.text, item.pattern)) findings.push(high(file, match.line, match.snippet, item.title, item.reason))
+    for (const match of findMatches(file.text, item.pattern)) {
+      pushUnique(findings, seen, high(file, match.line, match.snippet, item.title, item.reason))
+    }
   }
 
   const dynamicExecutionPatterns: Array<{ pattern: RegExp; title: string; reason: string }> = [
@@ -131,7 +308,9 @@ function scanJs(file: VirtualFile): Finding[] {
   ]
 
   for (const item of dynamicExecutionPatterns) {
-    for (const match of findMatches(file.text, item.pattern)) findings.push(dynamicCode(file, match.line, match.snippet, item.title, item.reason))
+    for (const match of findMatches(file.text, item.pattern)) {
+      findings.push(dynamicCode(file, match.line, match.snippet, item.title, item.reason))
+    }
   }
 
   return findings
@@ -151,7 +330,8 @@ function scanRemoteUrls(context: ScannerContext): Finding[] {
     for (const match of findMatches(file.text, remoteUrlPattern)) {
       const url = match.match[0]
       const looksExecutable = remoteCodeUrlPattern.test(url)
-      if (looksExecutable && highConfidenceRemoteCodeContextPattern.test(match.snippet)) continue
+      const directLiteral = directRemoteLiteralPattern.test(match.snippet)
+      if ((looksExecutable || directLiteral) && highConfidenceRemoteCodeContextPattern.test(match.snippet)) continue
       const key = `${file.normalizedPath}:${match.line}:${url}:${looksExecutable ? 'executable' : 'remote'}`
       if (seen.has(key)) continue
       seen.add(key)

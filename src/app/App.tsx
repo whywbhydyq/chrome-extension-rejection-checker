@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { EmptyState } from '../components/EmptyState'
 import { FindingList } from '../components/FindingList'
 import { HeroSection } from '../components/HeroSection'
+import { LocalScanFlow } from '../components/LocalScanFlow'
 import { ManualChecklist } from '../components/ManualChecklist'
 import { SampleReportPreview } from '../components/SampleReportPreview'
 import { ScanSummary } from '../components/ScanSummary'
@@ -10,7 +11,7 @@ import { SeverityGuide } from '../components/SeverityGuide'
 import { UploadZone } from '../components/UploadZone'
 import { findingRuleSummary, trackEvent } from '../core/analytics'
 import { scanContext } from '../core/ruleEngine'
-import type { ScanReport } from '../core/types'
+import type { ScanProgress, ScanReport } from '../core/types'
 import { readExtensionZip } from '../core/zipReader'
 import { SeoPage } from '../pages/SeoPage'
 import { seoPages } from '../pages/seoPages'
@@ -20,6 +21,10 @@ export function App() {
   const [error, setError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null)
+  const activeScanIdRef = useRef(0)
+  const activeAbortControllerRef = useRef<AbortController | null>(null)
+  const scanningRef = useRef(false)
 
   const currentPath = window.location.pathname.replace(/\/$/, '') || '/'
   const seoPage = seoPages.find((page) => page.path === currentPath)
@@ -31,16 +36,43 @@ export function App() {
     })
   }, [currentPath, seoPage])
 
+  useEffect(() => {
+    return () => activeAbortControllerRef.current?.abort()
+  }, [])
+
   if (seoPage) return <SeoPage page={seoPage} />
 
   async function scan(file: File) {
+    if (scanningRef.current) {
+      trackEvent('scan_ignored', { reason: 'scan_already_in_progress' })
+      return
+    }
+
+    const scanId = activeScanIdRef.current + 1
+    const abortController = new AbortController()
+    activeScanIdRef.current = scanId
+    activeAbortControllerRef.current = abortController
+    scanningRef.current = true
     setScanning(true)
+    setScanProgress({ phase: 'loading_zip' })
     setError(null)
     setCopied(false)
     trackEvent('scan_start')
+
+    const startedAt = performance.now()
     try {
-      const context = await readExtensionZip(file)
+      const context = await readExtensionZip(file, {
+        signal: abortController.signal,
+        onProgress: (progress) => {
+          if (activeScanIdRef.current === scanId) setScanProgress(progress)
+        },
+      })
+      if (activeScanIdRef.current !== scanId) return
+
+      setScanProgress({ phase: 'running_rules' })
       const nextReport = scanContext(context)
+      if (activeScanIdRef.current !== scanId) return
+
       setReport(nextReport)
       trackEvent('scan_success', {
         finding_count: nextReport.summary.total,
@@ -49,6 +81,7 @@ export function App() {
         low_count: nextReport.summary.low,
         rules_version: nextReport.rulesVersion,
         partial_scan: nextReport.scanLimits.length > 0,
+        duration_ms: Math.round(performance.now() - startedAt),
       })
       if (nextReport.summary.high > 0) {
         trackEvent('high_finding_detected', {
@@ -57,11 +90,21 @@ export function App() {
         })
       }
     } catch (err) {
+      if (activeScanIdRef.current !== scanId) return
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        trackEvent('scan_aborted')
+        return
+      }
       setReport(null)
       setError(err instanceof Error ? err.message : 'Could not scan this zip.')
       trackEvent('scan_failed', { error_reason: 'scan_exception' })
     } finally {
-      setScanning(false)
+      if (activeScanIdRef.current === scanId) {
+        setScanning(false)
+        setScanProgress(null)
+        scanningRef.current = false
+        activeAbortControllerRef.current = null
+      }
     }
   }
 
@@ -76,6 +119,7 @@ export function App() {
         <header className="mb-6 flex flex-col gap-3 rounded-3xl bg-white/80 px-5 py-4 shadow-sm ring-1 ring-slate-200 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <a className="text-sm font-black tracking-tight text-slate-950" href="/">Chrome Extension Rejection Checker</a>
           <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-slate-600" aria-label="Primary navigation">
+            <a className="hover:text-slate-950" href="/guides">Guides</a>
             <a className="hover:text-slate-950" href="/how-it-works">How it works</a>
             <a className="hover:text-slate-950" href="/privacy">Privacy</a>
             <a className="hover:text-slate-950" href="/fix-remote-hosted-code-manifest-v3">Rules covered</a>
@@ -83,16 +127,17 @@ export function App() {
         </header>
 
         <HeroSection />
+        <LocalScanFlow />
 
         <section className="mt-8 grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]" aria-label="Local ZIP scanner workbench">
           <div className="space-y-4">
-            <UploadZone scanning={scanning} onFile={(file) => void scan(file)} />
+            <UploadZone scanning={scanning} progress={scanProgress} onFile={(file) => void scan(file)} />
 
             <div className="rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-100">
               Packaging tip: when submitting to Chrome Web Store, zip the files inside your extension folder so manifest.json is at the ZIP root.
             </div>
 
-            {scanning && <p className="text-sm text-slate-600" role="status" aria-live="polite">Scanning locally in this browser…</p>}
+            {scanning && <p className="text-sm text-slate-600" role="status" aria-live="polite">{scanProgress?.phase === 'reading_entries' && scanProgress.totalEntries ? `Reading ZIP entries ${scanProgress.processedEntries ?? 0}/${scanProgress.totalEntries} locally…` : scanProgress?.phase === 'running_rules' ? 'Running static rules locally…' : 'Preparing the ZIP scan locally…'}</p>}
             {error && <p className="rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-700" role="alert">{error}</p>}
           </div>
 
@@ -114,6 +159,7 @@ export function App() {
             Chrome Extension Rejection Checker is an independent local preflight scanner. It is not affiliated with Google or Chrome Web Store and does not guarantee approval.
           </p>
           <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2" aria-label="Site policy links">
+            <a className="font-medium text-slate-700 hover:text-slate-950" href="/guides">Guides</a>
             <a className="font-medium text-slate-700 hover:text-slate-950" href="/about">About</a>
             <a className="font-medium text-slate-700 hover:text-slate-950" href="/privacy">Privacy</a>
             <a className="font-medium text-slate-700 hover:text-slate-950" href="/terms">Terms</a>

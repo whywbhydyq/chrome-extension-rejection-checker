@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CWS scanner icon">
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <path d="M32 10l18 7v13c0 12.5-7.1 20.8-18 24-10.9-3.2-18-11.5-18-24V17l18-7z" fill="#38bdf8"/>
+  <path d="M24.5 32.5l5.1 5.1 11.8-13" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

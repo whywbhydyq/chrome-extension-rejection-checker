@@ -6,12 +6,135 @@ type SeoPageProps = {
 }
 
 const siteUrl = 'https://cws.ymirtool.com'
+const defaultSocialImage = `${siteUrl}/og-image.png`
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
+}
+
+function getPageCanonical(page: SeoPageData) {
+  return `${siteUrl}${page.path}`
+}
+
+function getPageMetaTitle(page: SeoPageData) {
+  return page.metaTitle ?? `${page.title} – Chrome Extension Rejection Checker`
+}
+
+function getPageType(page: SeoPageData) {
+  return page.path === '/privacy' || page.path === '/guides' ? 'WebPage' : 'TechArticle'
+}
+
+function getGuideHubItems(page: SeoPageData) {
+  if (page.path !== '/guides') return []
+  return page.relatedLinks.map((link, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: `${siteUrl}${link.href}`,
+    name: link.label,
+  }))
+}
+
+function createStructuredData(page: SeoPageData) {
+  const canonical = getPageCanonical(page)
+  const pageType = getPageType(page)
+  const pageEntity: Record<string, unknown> = {
+    '@type': pageType,
+    '@id': `${canonical}#${pageType === 'TechArticle' ? 'article' : 'webpage'}`,
+    url: canonical,
+    name: page.title,
+    headline: page.title,
+    description: page.description,
+    inLanguage: 'en',
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    mainEntityOfPage: canonical,
+    breadcrumb: {
+      '@id': `${canonical}#breadcrumb`,
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+  }
+
+  if (page.lastUpdated) {
+    pageEntity.datePublished = page.lastUpdated
+    pageEntity.dateModified = page.lastUpdated
+  }
+
+  if (pageType === 'TechArticle') {
+    pageEntity.author = {
+      '@id': `${siteUrl}/#organization`,
+    }
+    pageEntity.about = [
+      'Chrome extension review preparation',
+      'Manifest V3 extension package validation',
+      'Chrome Web Store rejection risk checks',
+    ]
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      pageEntity,
+      ...(page.path === '/guides'
+        ? [{
+          '@type': 'ItemList',
+          '@id': `${canonical}#guide-list`,
+          name: 'Manifest V3 Chrome Web Store review guides',
+          itemListOrder: 'https://schema.org/ItemListOrderAscending',
+          numberOfItems: getGuideHubItems(page).length,
+          itemListElement: getGuideHubItems(page),
+        }]
+        : []),
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonical}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Chrome Extension Rejection Checker',
+            item: `${siteUrl}/`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: page.title,
+            item: canonical,
+          },
+        ],
+      },
+    ],
+  }
+}
+
+function upsertJsonLd(id: string, data: unknown) {
+  let element = document.getElementById(id) as HTMLScriptElement | null
+  if (!element) {
+    element = document.createElement('script')
+    element.id = id
+    element.type = 'application/ld+json'
+    document.head.appendChild(element)
+  }
+  element.textContent = JSON.stringify(data)
+}
 
 function upsertMeta(name: string, content: string) {
   let element = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
   if (!element) {
     element = document.createElement('meta')
     element.name = name
+    document.head.appendChild(element)
+  }
+  element.content = content
+}
+
+function upsertPropertyMeta(property: string, content: string) {
+  let element = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`)
+  if (!element) {
+    element = document.createElement('meta')
+    element.setAttribute('property', property)
     document.head.appendChild(element)
   }
   element.content = content
@@ -138,6 +261,24 @@ function ContentBlocks({ blocks }: { blocks?: SeoPageData['contentBlocks'] }) {
   )
 }
 
+
+function ReviewMethodCard({ page }: { page: SeoPageData }) {
+  if (!page.reviewMethod) return null
+
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="review-method-title">
+      <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Review method</p>
+      <h2 id="review-method-title" className="mt-3 text-3xl font-black tracking-tight">{page.reviewMethod.heading}</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{page.reviewMethod.body}</p>
+      <ul className="mt-6 space-y-3 text-sm leading-6 text-slate-700">
+        {page.reviewMethod.checks.map((check) => (
+          <li key={check} className="rounded-2xl bg-slate-50 p-4"><span className="font-bold text-slate-950">✓</span> {check}</li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 function PolicyFooter() {
   return (
     <footer className="border-t border-slate-200 pt-6 text-sm text-slate-600">
@@ -145,6 +286,7 @@ function PolicyFooter() {
         Chrome Extension Rejection Checker is an independent local preflight scanner. It is not affiliated with Google or Chrome Web Store and does not guarantee approval.
       </p>
       <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-2" aria-label="Site policy links">
+        <a className="font-medium text-slate-700 hover:text-slate-950" href="/guides">Guides</a>
         <a className="font-medium text-slate-700 hover:text-slate-950" href="/about">About</a>
         <a className="font-medium text-slate-700 hover:text-slate-950" href="/privacy">Privacy</a>
         <a className="font-medium text-slate-700 hover:text-slate-950" href="/terms">Terms</a>
@@ -157,10 +299,23 @@ function PolicyFooter() {
 
 export function SeoPage({ page }: SeoPageProps) {
   useEffect(() => {
-    const canonical = `${siteUrl}${page.path}`
-    document.title = `${page.title} – Chrome Extension Rejection Checker`
+    const canonical = getPageCanonical(page)
+    const title = getPageMetaTitle(page)
+    document.title = title
     upsertMeta('description', page.description)
+    upsertPropertyMeta('og:url', canonical)
+    upsertPropertyMeta('og:title', title)
+    upsertPropertyMeta('og:description', page.description)
+    upsertPropertyMeta('og:image', defaultSocialImage)
+    upsertPropertyMeta('og:image:width', '1200')
+    upsertPropertyMeta('og:image:height', '630')
+    upsertPropertyMeta('og:image:alt', 'Chrome Extension Rejection Checker local Manifest V3 ZIP scan')
+    upsertMeta('twitter:title', title)
+    upsertMeta('twitter:description', page.description)
+    upsertMeta('twitter:image', defaultSocialImage)
+    upsertMeta('twitter:image:alt', 'Chrome Extension Rejection Checker local Manifest V3 ZIP scan')
     upsertCanonical(canonical)
+    upsertJsonLd('structured-data', createStructuredData(page))
   }, [page])
 
   return (
@@ -179,6 +334,11 @@ export function SeoPage({ page }: SeoPageProps) {
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">{page.eyebrow}</p>
           <h1 className="mt-3 text-4xl font-black tracking-tight">{page.title}</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">{page.description}</p>
+          {page.lastUpdated && (
+            <p className="mt-4 text-sm font-semibold text-slate-500">
+              Last updated: <time dateTime={page.lastUpdated}>{formatDate(page.lastUpdated)}</time> · Independent preflight guidance based on public Chrome documentation and local scanner rules.
+            </p>
+          )}
           <a className="mt-8 inline-block rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white" href="/">
             Run local ZIP scan
           </a>
@@ -202,6 +362,8 @@ export function SeoPage({ page }: SeoPageProps) {
         {page.path === '/privacy' && <PrivacyAdvertisingDisclosure />}
 
         <ContentBlocks blocks={page.contentBlocks} />
+
+        <ReviewMethodCard page={page} />
 
         <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="checklist-title">
           <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Checklist</p>

@@ -1,5 +1,129 @@
 [
   {
+    "path": "/guides",
+    "eyebrow": "Manifest V3 review guide hub",
+    "title": "Chrome extension review guides for Manifest V3 submissions",
+    "metaTitle": "Chrome Extension Review Guides",
+    "description": "Follow focused Manifest V3 review guides for remote hosted code, eval, Blue Argon, permissions, privacy, packaging, and pre-submission checks.",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guide hub is maintained",
+      "body": "This hub groups pages by the review risk they help diagnose. Each linked guide is based on public Chrome documentation, local scanner rule coverage, and manual package-review workflows rather than private reviewer signals.",
+      "checks": [
+        "Group related review risks by user intent: diagnose, fix, resubmit, or explain.",
+        "Keep each linked guide tied to one primary Chrome Web Store review problem.",
+        "Prefer official Chrome documentation as the source basis for policy and package behavior.",
+        "Use the local scanner as preflight evidence, not as a guarantee of Chrome Web Store approval."
+      ]
+    },
+    "toolCta": {
+      "eyebrow": "Start with the package",
+      "title": "Scan the final ZIP, then open the matching guide",
+      "body": "Upload the production ZIP locally first. After the scanner identifies a rule family, use this hub to move from the finding to the right fix workflow without guessing from the rejection email alone.",
+      "primaryLabel": "Run the local ZIP scan",
+      "secondaryLabel": "Review how the scanner works",
+      "secondaryHref": "/how-it-works"
+    },
+    "sections": [
+      {
+        "heading": "Diagnose rejection patterns",
+        "body": "Use the rejection overview and MV3 checklist when the Chrome Web Store email is broad or when you need to separate package findings from Developer Dashboard review tasks."
+      },
+      {
+        "heading": "Fix executable-code issues",
+        "body": "Use the remote hosted code, Blue Argon, and eval guides when scanner findings point to extension-side JavaScript, workers, worklets, WebAssembly, CSP, or dynamic execution patterns."
+      },
+      {
+        "heading": "Prepare policy explanations",
+        "body": "Use the permissions and privacy guide when findings involve broad host access, sensitive APIs, user-data disclosures, or permission justification language."
+      }
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Choose the guide by the scanner finding, not by guesswork",
+        "body": "A rejection email may name a policy family without pointing to the exact generated file. Scan the package first, then choose the guide that matches the rule family. This prevents wasting time rewriting privacy copy when the actual blocker is a bundled script URL, or changing code when the problem is an overbroad permission explanation.",
+        "bullets": [
+          "Remote executable code findings should start with the RHC or Blue Argon guides.",
+          "Dynamic execution findings should start with the eval and CSP guide.",
+          "Broad permissions and privacy notes should start with the permissions/privacy guide."
+        ],
+        "ctaLabel": "Run the local ZIP scan",
+        "ctaHref": "/"
+      },
+      {
+        "heading": "Use the hub as a two-click content path",
+        "body": "Each guide links back to the scanner and to adjacent review pages. This keeps users in one review workflow: package the ZIP, scan it locally, open the specific fix guide, rebuild, rescan, and prepare the resubmission note. The hub exists to make that path visible to crawlers, AI answer systems, and users who land on a topic page first.",
+        "bullets": [
+          "Every core guide is reachable from this hub.",
+          "Every core guide links back to at least one adjacent guide.",
+          "The hub keeps commercial, informational, and troubleshooting intents separate."
+        ],
+        "ctaLabel": "Read the MV3 pre-submission checklist",
+        "ctaHref": "/manifest-v3-pre-submission-checklist"
+      },
+      {
+        "heading": "Keep official documentation as the decision boundary",
+        "body": "This site can explain common static-package risks, but it is not Chrome Web Store. When a guide recommends a code or manifest change, verify the final decision against official Chrome documentation and the current Developer Program Policies before resubmitting.",
+        "bullets": [
+          "Use public Chrome docs for policy and platform rules.",
+          "Use scanner output for package-level evidence.",
+          "Use reviewer notes only for the version that was actually rejected."
+        ],
+        "ctaLabel": "Review remote hosted code guidance",
+        "ctaHref": "/fix-remote-hosted-code-manifest-v3"
+      }
+    ],
+    "checklist": [
+      "Scan the exact ZIP that will be submitted to Chrome Web Store.",
+      "Open the guide that matches the highest-severity scanner finding first.",
+      "Fix package-level High findings before editing listing copy.",
+      "Use the MV3 checklist before every resubmission, even when only one finding was fixed.",
+      "Document package changes and dashboard changes separately in the reviewer note."
+    ],
+    "examples": [
+      {
+        "title": "Remote hosted code finding",
+        "body": "If the scanner flags a remote worker, import, script source, or WebAssembly loader, start with the remote hosted code guide before reviewing privacy copy."
+      },
+      {
+        "title": "Blue Argon rejection email",
+        "body": "If the email says Blue Argon or references remotely hosted code, use the Blue Argon guide to trace generated files and remove remote executable URLs."
+      },
+      {
+        "title": "Broad permissions warning",
+        "body": "If the scanner flags <all_urls> or sensitive APIs, use the permissions and privacy guide to decide whether to narrow the permission or improve justification text."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Why add a guide hub if the scanner already maps findings to guides?",
+        "answer": "The hub gives search users, crawlers, and AI systems a stable overview of the review workflow, while the scanner gives per-ZIP guidance after upload."
+      },
+      {
+        "question": "Should every rejection start at the same guide?",
+        "answer": "No. Start with the highest-severity package finding or the policy name in the rejection email, then use related guides for adjacent risks."
+      },
+      {
+        "question": "Does this hub replace Chrome documentation?",
+        "answer": "No. It organizes independent preflight guidance and links to official sources, but Chrome documentation and reviewer feedback remain the final authority."
+      }
+    ],
+    "sourceRefs": [
+      "cwsTroubleshooting",
+      "cwsPrepare",
+      "remoteHostedCode",
+      "programPolicies"
+    ],
+    "relatedLinkRefs": [
+      "chrome_web_store_rejection_checker",
+      "manifest_v3_pre_submission_checklist",
+      "fix_remote_hosted_code_manifest_v3",
+      "blue_argon_chrome_extension_error",
+      "chrome_extension_eval_rejection_fix",
+      "chrome_extension_host_permissions_privacy_review"
+    ]
+  },
+  {
     "path": "/chrome-web-store-rejection-checker",
     "eyebrow": "Chrome Web Store rejection guide",
     "title": "How to check a Chrome Web Store rejection before resubmission",
@@ -65,56 +189,6 @@
         "answer": "No. The ZIP is read in the browser. Do not add analytics that sends file paths, snippets, manifest content, or source code."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/manifest-v3-pre-submission-checklist",
-        "label": "Manifest V3 pre-submission checklist"
-      },
-      {
-        "href": "/fix-remote-hosted-code-manifest-v3",
-        "label": "Fix remote hosted code in Manifest V3"
-      },
-      {
-        "href": "/blue-argon-chrome-extension-error",
-        "label": "Fix Blue Argon rejection"
-      },
-      {
-        "href": "/chrome-extension-eval-rejection-fix",
-        "label": "Fix eval and dynamic code rejection"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Web Store: Troubleshooting violations",
-        "url": "https://developer.chrome.com/docs/webstore/troubleshooting",
-        "note": "Explains how Chrome Web Store rejection and violation references should be interpreted and fixed."
-      },
-      {
-        "label": "Chrome Web Store: Prepare your extension",
-        "url": "https://developer.chrome.com/docs/webstore/prepare",
-        "note": "States that the Chrome Web Store upload ZIP should contain manifest.json at the root, not nested inside a folder."
-      },
-      {
-        "label": "Chrome Extensions: Deal with remote hosted code violations",
-        "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
-        "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
-      },
-      {
-        "label": "Chrome Web Store: Fill out the privacy fields",
-        "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
-        "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
-      },
-      {
-        "label": "Chrome Web Store Developer Program Policies",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/policies",
-        "note": "Sets the broader user trust, transparency, and user data handling policy baseline for Chrome Web Store items."
-      },
-      {
-        "label": "Chrome Web Store: Update your item",
-        "url": "https://developer.chrome.com/docs/webstore/update",
-        "note": "Explains that code, manifest, or packaged asset changes require uploading a new ZIP and incrementing the version number."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Use the rejection email as a lead, not as the whole diagnosis",
@@ -171,6 +245,30 @@
         "ctaLabel": "Check the packaged ZIP now",
         "ctaHref": "/"
       }
+    ],
+    "metaTitle": "Chrome Web Store Rejection Checker | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "cwsTroubleshooting",
+      "cwsPrepare",
+      "remoteHostedCode",
+      "cwsPrivacy",
+      "programPolicies",
+      "cwsUpdate"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "manifest_v3_pre_submission_checklist",
+      "fix_remote_hosted_code_manifest_v3"
     ]
   },
   {
@@ -241,52 +339,6 @@
         "answer": "Yes. Rebuild the production ZIP after changes and scan the rebuilt package, because bundler output can change paths and generated files."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Chrome Web Store rejection checker"
-      },
-      {
-        "href": "/chrome-extension-host-permissions-privacy-review",
-        "label": "Host permissions and privacy review checklist"
-      },
-      {
-        "href": "/how-it-works",
-        "label": "How the scanner works"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Web Store: Prepare your extension",
-        "url": "https://developer.chrome.com/docs/webstore/prepare",
-        "note": "States that the Chrome Web Store upload ZIP should contain manifest.json at the root, not nested inside a folder."
-      },
-      {
-        "label": "Chrome Extensions: Manifest content security policy",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
-        "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
-      },
-      {
-        "label": "Chrome Extensions: Manifest sandbox",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/sandbox",
-        "note": "Documents sandbox.pages and the sandbox CSP requirements, including the sandbox directive and allow-same-origin restriction."
-      },
-      {
-        "label": "Chrome Web Store: Permissions policy",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/permissions",
-        "note": "Describes using only the narrowest permissions required for the extension's current functionality."
-      },
-      {
-        "label": "Chrome Web Store: Fill out the privacy fields",
-        "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
-        "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
-      },
-      {
-        "label": "Chrome Web Store: Update your item",
-        "url": "https://developer.chrome.com/docs/webstore/update",
-        "note": "Explains that changing code or package assets requires uploading a new ZIP and incrementing the extension version."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Check the artifact Chrome Web Store will actually receive",
@@ -343,6 +395,30 @@
         "ctaLabel": "Review host permissions and privacy notes",
         "ctaHref": "/chrome-extension-host-permissions-privacy-review"
       }
+    ],
+    "metaTitle": "MV3 Pre-Submission Checklist | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "cwsPrepare",
+      "mv3Csp",
+      "mv3Sandbox",
+      "permissionPolicies",
+      "cwsPrivacy",
+      "cwsUpdate"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "chrome_web_store_rejection_checker",
+      "chrome_extension_host_permissions_privacy_review"
     ]
   },
   {
@@ -416,37 +492,6 @@
         "answer": "Chrome Web Store evaluates the submitted package. Bundlers and dependencies can introduce remote script, worker, analytics, or wasm loader references that are not obvious in the source tree."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Run the local ZIP scanner"
-      },
-      {
-        "href": "/blue-argon-chrome-extension-error",
-        "label": "Fix Blue Argon rejection"
-      },
-      {
-        "href": "/chrome-extension-eval-rejection-fix",
-        "label": "Fix eval and dynamic code rejection"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Extensions: Deal with remote hosted code violations",
-        "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
-        "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
-      },
-      {
-        "label": "Chrome Extensions: Manifest content security policy",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
-        "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
-      },
-      {
-        "label": "Chrome Web Store: Troubleshooting violations",
-        "url": "https://developer.chrome.com/docs/webstore/troubleshooting",
-        "note": "Explains how Chrome Web Store rejection and violation references should be interpreted and fixed."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Distinguish executable code from remote data",
@@ -503,6 +548,27 @@
         "ctaLabel": "Scan the rebuilt ZIP after replacement",
         "ctaHref": "/"
       }
+    ],
+    "metaTitle": "Fix MV3 Remote Hosted Code | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "remoteHostedCode",
+      "mv3Csp",
+      "cwsTroubleshooting"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "chrome_web_store_rejection_checker",
+      "blue_argon_chrome_extension_error"
     ]
   },
   {
@@ -573,37 +639,6 @@
         "answer": "First fix high-risk findings, rebuild the final ZIP, and prepare clear reviewer notes. Then decide whether the store flow requires resubmission or a response to the rejection."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/fix-remote-hosted-code-manifest-v3",
-        "label": "Fix remote hosted code in Manifest V3"
-      },
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Run the local ZIP scanner"
-      },
-      {
-        "href": "/manifest-v3-pre-submission-checklist",
-        "label": "Manifest V3 pre-submission checklist"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Extensions: Deal with remote hosted code violations",
-        "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
-        "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
-      },
-      {
-        "label": "Chrome Web Store: Troubleshooting violations",
-        "url": "https://developer.chrome.com/docs/webstore/troubleshooting",
-        "note": "Explains how Chrome Web Store rejection and violation references should be interpreted and fixed."
-      },
-      {
-        "label": "Chrome Extensions: Manifest content security policy",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
-        "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Investigate Blue Argon from the compiled package outward",
@@ -621,7 +656,7 @@
         "body": "If you resubmit, keep reviewer notes factual and narrow. State what you changed, which remote executable paths were removed, and that executable dependencies are now bundled in the extension package. Do not claim the tool proves compliance or that approval is guaranteed. The scanner report can help you organize the fix, but the final decision remains with Chrome Web Store review.",
         "bullets": [
           "Mention specific removed loaders or bundled libraries.",
-          "Avoid broad claims such as \u201call risks fixed\u201d unless manually verified.",
+          "Avoid broad claims such as “all risks fixed” unless manually verified.",
           "Attach internal release notes only if they do not expose sensitive source details."
         ],
         "ctaLabel": "Review remote hosted code fixes",
@@ -660,13 +695,34 @@
         "ctaLabel": "Read how the scanner works and its limits",
         "ctaHref": "/how-it-works"
       }
+    ],
+    "metaTitle": "Fix Blue Argon Rejection | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "remoteHostedCode",
+      "cwsTroubleshooting",
+      "mv3Csp"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "fix_remote_hosted_code_manifest_v3",
+      "chrome_web_store_rejection_checker"
     ]
   },
   {
     "path": "/chrome-extension-eval-rejection-fix",
     "eyebrow": "Dynamic code execution",
     "title": "Chrome extension eval() and dynamic code rejection fix",
-    "description": "Find eval, new Function, and string-based timers that can trigger Chrome extension CSP and review problems.",
+    "description": "Find eval, new Function, string timers, inline handlers, and dynamic script patterns that can trigger Manifest V3 CSP or Chrome Web Store review problems.",
     "toolCta": {
       "eyebrow": "Dynamic code preflight step",
       "title": "Check the packaged extension for eval-style patterns",
@@ -728,37 +784,6 @@
         "answer": "Use explicit local functions, static imports, command maps, and structured data. Avoid constructing executable code from strings."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Run the local ZIP scanner"
-      },
-      {
-        "href": "/fix-remote-hosted-code-manifest-v3",
-        "label": "Fix remote hosted code in Manifest V3"
-      },
-      {
-        "href": "/manifest-v3-pre-submission-checklist",
-        "label": "Manifest V3 pre-submission checklist"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Extensions: Manifest content security policy",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
-        "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
-      },
-      {
-        "label": "Chrome Extensions: Manifest sandbox",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/sandbox",
-        "note": "Documents sandbox.pages and the sandbox CSP requirements, including the sandbox directive and allow-same-origin restriction."
-      },
-      {
-        "label": "Chrome Extensions: Deal with remote hosted code violations",
-        "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
-        "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Replace string execution with bundled functions or modules",
@@ -773,7 +798,7 @@
       },
       {
         "heading": "Use sandbox pages deliberately, not as a shortcut",
-        "body": "Some extension designs use sandboxed pages for isolated execution contexts, but sandbox pages have a separate manifest declaration and a separate CSP. They should not be used to bypass ordinary extension-pages restrictions without understanding Chrome\u2019s sandbox requirements. The scanner flags sandbox pages and checks key CSP mistakes, but runtime design still needs manual review.",
+        "body": "Some extension designs use sandboxed pages for isolated execution contexts, but sandbox pages have a separate manifest declaration and a separate CSP. They should not be used to bypass ordinary extension-pages restrictions without understanding Chrome’s sandbox requirements. The scanner flags sandbox pages and checks key CSP mistakes, but runtime design still needs manual review.",
         "bullets": [
           "Confirm sandbox.pages points to packaged files.",
           "Confirm custom sandbox CSP includes the sandbox directive.",
@@ -815,6 +840,27 @@
         "ctaLabel": "Re-scan the release package after bundler changes",
         "ctaHref": "/"
       }
+    ],
+    "metaTitle": "Fix Chrome Extension eval Rejection | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "mv3Csp",
+      "mv3Sandbox",
+      "remoteHostedCode"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "chrome_web_store_rejection_checker",
+      "fix_remote_hosted_code_manifest_v3"
     ]
   },
   {
@@ -885,52 +931,6 @@
         "answer": "Keep it, but document why it is necessary, make the user-facing behavior clear, and ensure privacy disclosures match actual data use."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Run the local ZIP scanner"
-      },
-      {
-        "href": "/manifest-v3-pre-submission-checklist",
-        "label": "Manifest V3 pre-submission checklist"
-      },
-      {
-        "href": "/how-it-works",
-        "label": "How the scanner works"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Web Store: Permissions policy",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/permissions",
-        "note": "Describes using only the narrowest permissions required for the extension's current functionality."
-      },
-      {
-        "label": "Chrome Extensions: Declare permissions",
-        "url": "https://developer.chrome.com/docs/extensions/develop/concepts/declare-permissions",
-        "note": "Explains permission declarations, optional permissions, and permission warning implications."
-      },
-      {
-        "label": "Chrome Extensions: Permission warning guidelines",
-        "url": "https://developer.chrome.com/docs/extensions/develop/concepts/permission-warnings",
-        "note": "Explains that some extension permissions trigger install-time or runtime warnings."
-      },
-      {
-        "label": "Chrome Extensions: activeTab permission",
-        "url": "https://developer.chrome.com/docs/extensions/develop/concepts/activeTab",
-        "note": "Documents activeTab as temporary user-invoked access that can sometimes replace broad host access."
-      },
-      {
-        "label": "Chrome Web Store: Fill out the privacy fields",
-        "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
-        "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
-      },
-      {
-        "label": "Chrome Web Store Developer Program Policies",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/policies",
-        "note": "Sets the broader user trust, transparency, and user data handling policy baseline for Chrome Web Store items."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Create a permission-to-feature map before resubmission",
@@ -945,7 +945,7 @@
       },
       {
         "heading": "Treat privacy review as a product explanation task",
-        "body": "The scanner can detect permission and host-access signals, but it cannot fill out your Developer Dashboard fields. Your public listing and privacy answers should explain what data the extension handles, why that access is required, and how the behavior supports the extension\u2019s single purpose. Avoid vague statements that do not match the manifest permissions.",
+        "body": "The scanner can detect permission and host-access signals, but it cannot fill out your Developer Dashboard fields. Your public listing and privacy answers should explain what data the extension handles, why that access is required, and how the behavior supports the extension’s single purpose. Avoid vague statements that do not match the manifest permissions.",
         "bullets": [
           "Use plain-language feature explanations.",
           "Keep privacy claims aligned with actual extension behavior.",
@@ -987,13 +987,37 @@
         "ctaLabel": "Read how findings are classified",
         "ctaHref": "/how-it-works"
       }
+    ],
+    "metaTitle": "Host Permissions Privacy Review | CWS Scanner",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "permissionPolicies",
+      "declarePermissions",
+      "permissionWarnings",
+      "activeTab",
+      "cwsPrivacy",
+      "programPolicies"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "chrome_web_store_rejection_checker",
+      "manifest_v3_pre_submission_checklist"
     ]
   },
   {
     "path": "/privacy",
     "eyebrow": "Privacy and local scanning",
     "title": "Privacy notes for the local Chrome extension ZIP scanner",
-    "description": "Understand what the local scanner reads, what it does not upload, and which analytics data should never be collected.",
+    "description": "Understand what the local scanner reads in your ZIP, what it does not upload, which analytics events are allowed, and how privacy data stays out of reports.",
     "toolCta": {
       "eyebrow": "Privacy-safe next step",
       "title": "Use the scanner without uploading your source package",
@@ -1061,32 +1085,6 @@
         "answer": "No. It is a local static preflight scan and cannot guarantee Chrome Web Store approval."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/how-it-works",
-        "label": "How the scanner works"
-      },
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Run the local ZIP scanner"
-      },
-      {
-        "href": "/manifest-v3-pre-submission-checklist",
-        "label": "Manifest V3 checklist"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Web Store: Fill out the privacy fields",
-        "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
-        "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
-      },
-      {
-        "label": "Chrome Web Store Developer Program Policies",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/policies",
-        "note": "Sets the broader user trust, transparency, and user data handling policy baseline for Chrome Web Store items."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Keep scan data local by design",
@@ -1143,13 +1141,33 @@
         "ctaLabel": "See scanner limits and data boundaries",
         "ctaHref": "/how-it-works"
       }
+    ],
+    "metaTitle": "Privacy | Chrome Extension Rejection Checker",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "cwsPrivacy",
+      "programPolicies"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "how_it_works",
+      "chrome_web_store_rejection_checker"
     ]
   },
   {
     "path": "/how-it-works",
     "eyebrow": "Scanner methodology",
     "title": "How the Chrome extension rejection checker works",
-    "description": "See the static rules, limits, and review workflow behind the local Manifest V3 ZIP scanner.",
+    "description": "See how the local Manifest V3 ZIP scanner reads files, applies static rejection rules, ranks findings, and links each issue to a safer resubmission workflow.",
     "toolCta": {
       "eyebrow": "Try the workflow",
       "title": "Run the same rules against your production ZIP",
@@ -1224,52 +1242,6 @@
         "answer": "The core rules map to Chrome documentation for remote hosted code, Manifest V3 CSP, sandbox pages, ZIP packaging, privacy practices, and permission policies. The scanner shows these sources so each finding can be reviewed against the source of truth."
       }
     ],
-    "relatedLinks": [
-      {
-        "href": "/privacy",
-        "label": "Privacy notes"
-      },
-      {
-        "href": "/chrome-web-store-rejection-checker",
-        "label": "Chrome Web Store rejection checker"
-      },
-      {
-        "href": "/chrome-extension-host-permissions-privacy-review",
-        "label": "Permissions and privacy review"
-      }
-    ],
-    "sources": [
-      {
-        "label": "Chrome Extensions: Deal with remote hosted code violations",
-        "url": "https://developer.chrome.com/docs/extensions/develop/migrate/remote-hosted-code",
-        "note": "Defines remotely hosted code as browser-executed JS/WASM loaded outside the extension package and recommends scanning compiled submission output for http/https references."
-      },
-      {
-        "label": "Chrome Extensions: Manifest content security policy",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/content-security-policy",
-        "note": "Documents extension_pages and sandbox CSP policies, default policies, and MV3 minimum CSP restrictions."
-      },
-      {
-        "label": "Chrome Extensions: Manifest sandbox",
-        "url": "https://developer.chrome.com/docs/extensions/reference/manifest/sandbox",
-        "note": "Documents sandbox.pages and the sandbox CSP requirements, including the sandbox directive and allow-same-origin restriction."
-      },
-      {
-        "label": "Chrome Web Store: Prepare your extension",
-        "url": "https://developer.chrome.com/docs/webstore/prepare",
-        "note": "States that the Chrome Web Store upload ZIP should contain manifest.json at the root, not nested inside a folder."
-      },
-      {
-        "label": "Chrome Web Store: Fill out the privacy fields",
-        "url": "https://developer.chrome.com/docs/webstore/cws-dashboard-privacy",
-        "note": "Explains the Developer Dashboard privacy practices tab, single purpose, and permission justification fields."
-      },
-      {
-        "label": "Chrome Web Store: Permissions policy",
-        "url": "https://developer.chrome.com/docs/webstore/program-policies/permissions",
-        "note": "Describes using only the narrowest permissions required for the extension's current functionality."
-      }
-    ],
     "contentBlocks": [
       {
         "heading": "Read severity as triage priority, not final policy judgment",
@@ -1326,6 +1298,30 @@
         "ctaLabel": "Open the local scanner",
         "ctaHref": "/"
       }
+    ],
+    "metaTitle": "How the Local ZIP Scanner Works | CWS Checker",
+    "lastUpdated": "2026-06-06",
+    "reviewMethod": {
+      "heading": "How this guidance is maintained",
+      "body": "This page is reviewed against Chrome extension documentation, Chrome Web Store policy guidance, and the scanner rules used by this local ZIP checker. It is independent preflight guidance, not an official Chrome Web Store review decision.",
+      "checks": [
+        "Compare the topic against current Chrome extension and Chrome Web Store documentation.",
+        "Map the guidance to concrete package-level checks: manifest fields, file references, CSP, remote code, dynamic code, permissions, and privacy disclosures.",
+        "Keep limitations visible: the scanner cannot inspect Developer Dashboard fields, human reviewer judgment, unpublished runtime behavior, or account-level policy history."
+      ]
+    },
+    "sourceRefs": [
+      "remoteHostedCode",
+      "mv3Csp",
+      "mv3Sandbox",
+      "cwsPrepare",
+      "cwsPrivacy",
+      "permissionPolicies"
+    ],
+    "relatedLinkRefs": [
+      "guides",
+      "privacy",
+      "chrome_web_store_rejection_checker"
     ]
   }
 ]

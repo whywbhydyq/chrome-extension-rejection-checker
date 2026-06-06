@@ -2,8 +2,21 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 const siteUrl = 'https://cws.ymirtool.com'
+const defaultSocialImage = `${siteUrl}/og-image.png`
 const dataPath = join(process.cwd(), 'src', 'pages', 'seoPagesData.json')
-const pages = JSON.parse(await readFile(dataPath, 'utf8'))
+const sharedDataPath = join(process.cwd(), 'src', 'pages', 'seoPageSharedData.json')
+const rawPages = JSON.parse(await readFile(dataPath, 'utf8'))
+const sharedPageData = JSON.parse(await readFile(sharedDataPath, 'utf8'))
+
+function hydratePage(page) {
+  return {
+    ...page,
+    sources: page.sources ?? page.sourceRefs?.map((ref) => sharedPageData.sources[ref]).filter(Boolean) ?? [],
+    relatedLinks: page.relatedLinks ?? page.relatedLinkRefs?.map((ref) => sharedPageData.relatedLinks[ref]).filter(Boolean) ?? [],
+  }
+}
+
+const pages = rawPages.map(hydratePage)
 
 function escapeHtml(value) {
   return String(value)
@@ -18,43 +31,113 @@ function escapeAttribute(value) {
   return escapeHtml(value).replaceAll('`', '&#96;')
 }
 
-function createFaqSchema(page) {
-  return JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: page.faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  }, null, 6)
+function formatDate(date) {
+  return new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
 }
 
-function createSoftwareSchema(page) {
+function getPageCanonical(page) {
+  return `${siteUrl}${page.path}`
+}
+
+function getPageMetaTitle(page) {
+  return page.metaTitle ?? `${page.title} – Chrome Extension Rejection Checker`
+}
+
+function getPageType(page) {
+  if (page.path === '/privacy' || page.path === '/guides') return 'WebPage'
+  return 'TechArticle'
+}
+
+function getGuideHubItems(page) {
+  if (page.path !== '/guides') return []
+  return page.relatedLinks.map((link, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: `${siteUrl}${link.href}`,
+    name: link.label,
+  }))
+}
+
+function createBreadcrumbSchema(page) {
+  const canonical = getPageCanonical(page)
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': `${canonical}#breadcrumb`,
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Chrome Extension Rejection Checker',
+        item: `${siteUrl}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: page.title,
+        item: canonical,
+      },
+    ],
+  }
+}
+
+function createPageEntity(page) {
+  const canonical = getPageCanonical(page)
+  const pageType = getPageType(page)
+  const entity = {
+    '@type': pageType,
+    '@id': `${canonical}#${pageType === 'TechArticle' ? 'article' : 'webpage'}`,
+    url: canonical,
+    name: page.title,
+    headline: page.title,
+    description: page.description,
+    inLanguage: 'en',
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    mainEntityOfPage: canonical,
+    breadcrumb: {
+      '@id': `${canonical}#breadcrumb`,
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+  }
+
+  if (page.lastUpdated) {
+    entity.datePublished = page.lastUpdated
+    entity.dateModified = page.lastUpdated
+  }
+
+  if (pageType === 'TechArticle') {
+    entity.author = {
+      '@id': `${siteUrl}/#organization`,
+    }
+    entity.about = [
+      'Chrome extension review preparation',
+      'Manifest V3 extension package validation',
+      'Chrome Web Store rejection risk checks',
+    ]
+  }
+
+  return entity
+}
+
+function createStructuredData(page) {
   return JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': ['SoftwareApplication', 'WebApplication'],
-    name: page.path === '/' ? 'Chrome Extension Rejection Checker' : page.title,
-    applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Web',
-    url: `${siteUrl}${page.path}`,
-    description: page.description,
-    isAccessibleForFree: true,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    featureList: [
-      'Local ZIP scan',
-      'Manifest V3 preflight check',
-      'Remote hosted code detection',
-      'Dynamic code execution detection',
-      'CSP review',
-      'Permission and privacy review reminders',
+    '@graph': [
+      createPageEntity(page),
+      ...(page.path === '/guides'
+        ? [{
+          '@type': 'ItemList',
+          '@id': `${getPageCanonical(page)}#guide-list`,
+          name: 'Manifest V3 Chrome Web Store review guides',
+          itemListOrder: 'https://schema.org/ItemListOrderAscending',
+          numberOfItems: getGuideHubItems(page).length,
+          itemListElement: getGuideHubItems(page),
+        }]
+        : []),
+      createBreadcrumbSchema(page),
     ],
   }, null, 6)
 }
@@ -65,19 +148,12 @@ function replaceOrInsertHeadTag(html, matcher, replacement) {
 }
 
 function replaceJsonLd(html, page) {
-  const faqMarker = /<script type="application\/ld\+json">\s*\{\s*"@context": "https:\/\/schema\.org",\s*"@type": "FAQPage",[\s\S]*?\n    <\/script>/
-  const softwareMarker = /<script type="application\/ld\+json">\s*\{\s*"@context": "https:\/\/schema\.org",\s*"@type": "SoftwareApplication",[\s\S]*?\n    <\/script>/
-  let nextHtml = replaceOrInsertHeadTag(
-    html,
-    softwareMarker,
-    `    <script type="application/ld+json">\n      ${createSoftwareSchema(page)}\n    </script>`,
+  const jsonLdBlock = /\n\s*<script\b(?=[^>]*\btype="application\/ld\+json")[^>]*>[\s\S]*?<\/script>/g
+  const withoutJsonLd = html.replace(jsonLdBlock, '')
+  return withoutJsonLd.replace(
+    '</head>',
+    `    <script id="structured-data" type="application/ld+json">\n      ${createStructuredData(page)}\n    </script>\n  </head>`,
   )
-  nextHtml = replaceOrInsertHeadTag(
-    nextHtml,
-    faqMarker,
-    `    <script type="application/ld+json">\n      ${createFaqSchema(page)}\n    </script>`,
-  )
-  return nextHtml
 }
 
 function renderCardGrid(items) {
@@ -216,12 +292,28 @@ function renderSources(sources) {
         </section>`
 }
 
+function renderReviewMethod(page) {
+  if (!page.reviewMethod) return ''
+  const checks = page.reviewMethod.checks.map((check) => `
+            <li class="rounded-2xl bg-slate-50 p-4"><span class="font-bold text-slate-950">✓</span> ${escapeHtml(check)}</li>`).join('')
+  return `
+
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="review-method-title">
+          <p class="text-sm font-bold uppercase tracking-widest text-slate-500">Review method</p>
+          <h2 id="review-method-title" class="mt-3 text-3xl font-black tracking-tight">${escapeHtml(page.reviewMethod.heading)}</h2>
+          <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-600">${escapeHtml(page.reviewMethod.body)}</p>
+          <ul class="mt-6 space-y-3 text-sm leading-6 text-slate-700">${checks}
+          </ul>
+        </section>`
+}
+
 function renderPolicyFooter() {
   return `
 
         <footer class="border-t border-slate-200 pt-6 text-sm text-slate-600">
           <p>Chrome Extension Rejection Checker is an independent local preflight scanner. It is not affiliated with Google or Chrome Web Store and does not guarantee approval.</p>
           <nav class="mt-3 flex flex-wrap gap-x-4 gap-y-2" aria-label="Site policy links">
+            <a class="font-medium text-slate-700 hover:text-slate-950" href="/guides">Guides</a>
             <a class="font-medium text-slate-700 hover:text-slate-950" href="/about">About</a>
             <a class="font-medium text-slate-700 hover:text-slate-950" href="/privacy">Privacy</a>
             <a class="font-medium text-slate-700 hover:text-slate-950" href="/terms">Terms</a>
@@ -244,6 +336,7 @@ function renderStaticPage(page) {
           <p class="text-sm font-bold uppercase tracking-widest text-slate-500">${escapeHtml(page.eyebrow)}</p>
           <h1 class="mt-3 text-4xl font-black tracking-tight">${escapeHtml(page.title)}</h1>
           <p class="mt-4 max-w-3xl text-base leading-7 text-slate-600">${escapeHtml(page.description)}</p>
+          ${page.lastUpdated ? `<p class="mt-4 text-sm font-semibold text-slate-500">Last updated: <time datetime="${escapeAttribute(page.lastUpdated)}">${escapeHtml(formatDate(page.lastUpdated))}</time> · Independent preflight guidance based on public Chrome documentation and local scanner rules.</p>` : ''}
           <a class="mt-8 inline-block rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white" href="/">Run local ZIP scan</a>
         </section>${renderToolCta(page.toolCta)}
 
@@ -252,7 +345,7 @@ function renderStaticPage(page) {
           <h2 id="guide-sections-title" class="mt-3 text-3xl font-black tracking-tight">What to check</h2>
           <div class="mt-6 grid gap-5 md:grid-cols-3">${renderCardGrid(page.sections)}
           </div>
-        </section>${renderPrivacyAdvertisingDisclosure(page)}${renderContentBlocks(page.contentBlocks)}
+        </section>${renderPrivacyAdvertisingDisclosure(page)}${renderContentBlocks(page.contentBlocks)}${renderReviewMethod(page)}
 
         <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 md:p-8" aria-labelledby="checklist-title">
           <p class="text-sm font-bold uppercase tracking-widest text-slate-500">Checklist</p>
@@ -305,7 +398,7 @@ function replaceStaticBody(html, page) {
 
 function replaceMeta(html, page) {
   const canonical = `${siteUrl}${page.path}`
-  const title = `${page.title} – Chrome Extension Rejection Checker`
+  const title = getPageMetaTitle(page)
   const escapedTitle = escapeAttribute(title)
   const escapedDescription = escapeAttribute(page.description)
   const escapedCanonical = escapeAttribute(canonical)
@@ -346,6 +439,37 @@ function replaceMeta(html, page) {
     nextHtml,
     /<meta\b(?=[^>]*\bname="twitter:description")[^>]*>/,
     `<meta name="twitter:description" content="${escapedDescription}" />`,
+  )
+
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:image")[^>]*>/,
+    `<meta property="og:image" content="${defaultSocialImage}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:image:width")[^>]*>/,
+    '<meta property="og:image:width" content="1200" />',
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:image:height")[^>]*>/,
+    '<meta property="og:image:height" content="630" />',
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bproperty="og:image:alt")[^>]*>/,
+    '<meta property="og:image:alt" content="Chrome Extension Rejection Checker local Manifest V3 ZIP scan" />',
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bname="twitter:image")[^>]*>/,
+    `<meta name="twitter:image" content="${defaultSocialImage}" />`,
+  )
+  nextHtml = replaceOrInsertHeadTag(
+    nextHtml,
+    /<meta\b(?=[^>]*\bname="twitter:image:alt")[^>]*>/,
+    '<meta name="twitter:image:alt" content="Chrome Extension Rejection Checker local Manifest V3 ZIP scan" />',
   )
 
   return replaceJsonLd(nextHtml, page)

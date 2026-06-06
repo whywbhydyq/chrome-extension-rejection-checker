@@ -1,4 +1,5 @@
 import type { Finding, ScanReport, ScannerContext } from './types'
+import { rulesVersion } from './version'
 import { runCspRules } from '../rules/cspRules'
 import { runIconRules } from '../rules/iconRules'
 import { runManifestRules } from '../rules/manifestRules'
@@ -6,7 +7,6 @@ import { runPermissionRules } from '../rules/permissionRules'
 import { runPrivacyRules } from '../rules/privacyRules'
 import { runRemoteCodeRules } from '../rules/remoteCodeRules'
 
-export const rulesVersion = '2026-05-30-mv3-static-rules'
 
 export type RuleRunner = (context: ScannerContext) => Finding[]
 

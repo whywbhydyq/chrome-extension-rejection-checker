@@ -2,8 +2,45 @@ import type { VirtualFile } from './types'
 
 const textExtensions = new Set(['.json', '.js', '.mjs', '.cjs', '.html', '.htm', '.css', '.txt', '.md', '.svg'])
 
+export type CanonicalPathResult = {
+  path: string
+  hadTraversal: boolean
+  escapedRoot: boolean
+  hadLeadingSlash: boolean
+}
+
+export function canonicalizePath(path: string): CanonicalPathResult {
+  const hadLeadingSlash = /^[/\\]+/.test(path)
+  const segments = path.replace(/\\/g, '/').split('/')
+  const stack: string[] = []
+  let hadTraversal = false
+  let escapedRoot = false
+
+  for (const segment of segments) {
+    if (!segment || segment === '.') continue
+    if (segment === '..') {
+      hadTraversal = true
+      if (stack.length > 0) stack.pop()
+      else escapedRoot = true
+      continue
+    }
+    stack.push(segment)
+  }
+
+  return {
+    path: stack.join('/'),
+    hadTraversal,
+    escapedRoot,
+    hadLeadingSlash,
+  }
+}
+
 export function normalizePath(path: string): string {
-  return path.replace(/\\/g, '/').replace(/^\.?\//, '').replace(/\/+/g, '/')
+  return canonicalizePath(path).path
+}
+
+export function normalizeManifestResourcePath(path: string): CanonicalPathResult {
+  return canonicalizePath(path)
 }
 
 export function dirname(path: string): string {

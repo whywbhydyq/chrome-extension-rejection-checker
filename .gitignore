@@ -9,3 +9,5 @@ dist
 !fixtures.zip
 !extension-test.zip
 !fixtures/*.zip
+
+.seo-cache/

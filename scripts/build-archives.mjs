@@ -21,7 +21,7 @@ async function listFiles(dir) {
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name)
       if (entry.isDirectory()) {
-        if (['node_modules', 'dist', '.git', '.vercel'].includes(entry.name)) continue
+        if (['node_modules', 'dist', '.git', '.vercel', '.seo-cache', 'coverage'].includes(entry.name)) continue
         await walk(fullPath)
       } else {
         results.push(fullPath)
@@ -71,6 +71,8 @@ async function main() {
 
   const srcBundleFiles = [
     'index.html',
+    'package.json',
+    'package-lock.json',
     'vite.config.ts',
     'tsconfig.json',
     'tsconfig.app.json',
@@ -80,12 +82,17 @@ async function main() {
     'QUICKSTART.md',
     'PRD.md',
     'requirements.md',
+    'CREATOR_SKILL.md',
+    'FIRST_CONVERSATION_BRIEF.md',
+    'UNIVERSAL_FIRST_CONVERSATION_TEMPLATE.md',
     '.gitignore',
   ].map((item) => path.join(root, item))
 
   const srcFiles = await listFiles(path.join(root, 'src'))
   const publicFiles = await listFiles(path.join(root, 'public'))
-  await zipFiles([...srcBundleFiles, ...srcFiles, ...publicFiles], root, path.join(root, 'src.zip'))
+  const scriptFiles = await listFiles(path.join(root, 'scripts'))
+  const docFiles = await listFiles(path.join(root, 'docs'))
+  await zipFiles([...srcBundleFiles, ...srcFiles, ...publicFiles, ...scriptFiles, ...docFiles], root, path.join(root, 'src.zip'))
 
   const fixtureRoot = path.join(root, 'fixtures-src')
   const fixtureFolders = (await exists(fixtureRoot)) ? await fs.readdir(fixtureRoot, { withFileTypes: true }) : []
