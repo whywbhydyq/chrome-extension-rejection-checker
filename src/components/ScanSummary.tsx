@@ -1,7 +1,6 @@
 import type { ScanReport } from '../core/types'
 import { ReportActions } from './ReportActions'
 import { ResultExplanation } from './ResultExplanation'
-import { SuggestedFixPath } from './SuggestedFixPath'
 
 type ScanSummaryProps = {
   report: ScanReport
@@ -44,7 +43,6 @@ export function ScanSummary({ report, copied, onCopied }: ScanSummaryProps) {
         <ReportActions report={report} copied={copied} onCopied={onCopied} />
       </div>
       <ResultExplanation report={report} />
-      <SuggestedFixPath report={report} />
     </div>
   )
 }

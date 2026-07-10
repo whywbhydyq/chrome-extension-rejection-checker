@@ -75,11 +75,16 @@ function reviewToken(directive: string, token: string, allowedTokens: Set<string
   const nonceOrHash = /^'(?:nonce-|sha256-|sha384-|sha512-)/i.test(token)
 
   if (remoteOrBroadSource || unsafeKeyword || nonceOrHash) {
+    const title = normalized === "'unsafe-eval'"
+      ? `Extension CSP contains unsafe-eval in ${directive}`
+      : normalized === "'unsafe-inline'"
+        ? `Extension CSP contains unsafe-inline in ${directive}`
+        : `Extension CSP allows unsafe ${directive} source`
     return {
       directive,
       token,
       severity: 'high',
-      title: `Extension CSP allows unsafe ${directive} source`,
+      title,
       reason: `The ${directive} directive includes ${token}, which is not an allowed Manifest V3 extension_pages source for production extension pages.`,
       recommendation: directive === 'object-src'
         ? "Use object-src 'self' only when packaged object/embed resources are required; otherwise use object-src 'none'."

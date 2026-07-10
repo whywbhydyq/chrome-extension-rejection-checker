@@ -1,34 +1,19 @@
 import { trackEvent } from '../core/analytics'
-import type { ScanProgress } from '../core/types'
 
 type UploadZoneProps = {
   scanning: boolean
-  progress?: ScanProgress | null
   onFile: (file: File) => void
 }
 
-function progressLabel(progress?: ScanProgress | null): string {
-  if (!progress) return 'Scanning locally…'
-  if (progress.phase === 'loading_zip') return 'Reading ZIP metadata…'
-  if (progress.phase === 'running_rules') return 'Running static rules…'
-  if (progress.totalEntries) return `Reading ${progress.processedEntries ?? 0}/${progress.totalEntries} files…`
-  return 'Reading ZIP files…'
-}
-
-export function UploadZone({ scanning, progress, onFile }: UploadZoneProps) {
+export function UploadZone({ scanning, onFile }: UploadZoneProps) {
   const inputId = 'extension-zip-input'
 
-  function handleFile(file?: File | null, source: 'input' | 'drop' = 'input') {
+  function handleFile(file?: File | null) {
     if (!file) return
-    if (scanning) {
-      trackEvent('upload_blocked_during_scan', { source_component: 'upload_zone', upload_source: source })
-      return
-    }
     onFile(file)
   }
 
   function trackUploadClick() {
-    if (scanning) return
     trackEvent('upload_click', {
       cta_text: 'Choose production ZIP',
       source_component: 'upload_zone',
@@ -41,16 +26,16 @@ export function UploadZone({ scanning, progress, onFile }: UploadZoneProps) {
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => {
         event.preventDefault()
-        handleFile(event.dataTransfer.files.item(0), 'drop')
+        handleFile(event.dataTransfer.files.item(0))
       }}
     >
-      <label htmlFor={inputId} className={scanning ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'} aria-disabled={scanning} onClick={trackUploadClick}>
+      <label htmlFor={inputId} className="cursor-pointer" onClick={trackUploadClick}>
         <span className="block text-2xl font-black tracking-tight text-slate-950">Drop the final production ZIP</span>
         <span id="zip-help" className="mx-auto mt-3 block max-w-md text-sm leading-6 text-slate-600">
           Use the same ZIP you plan to submit. manifest.json should be at the ZIP root. The browser scanner rejects very large packages before reading files.
         </span>
         <span className="mt-6 inline-flex rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
-          {scanning ? progressLabel(progress) : 'Choose production ZIP'}
+          {scanning ? 'Scanning locally…' : 'Choose production ZIP'}
         </span>
       </label>
       <input
@@ -61,7 +46,7 @@ export function UploadZone({ scanning, progress, onFile }: UploadZoneProps) {
         aria-describedby="zip-help"
         disabled={scanning}
         onChange={(event) => {
-          handleFile(event.currentTarget.files?.item(0), 'input')
+          handleFile(event.currentTarget.files?.item(0))
           event.currentTarget.value = ''
         }}
       />
