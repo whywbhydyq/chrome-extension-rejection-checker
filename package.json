@@ -38,5 +38,9 @@
     "rejection-checker",
     "remote-hosted-code"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
+  "packageManager": "npm@10.9.2"
 }
